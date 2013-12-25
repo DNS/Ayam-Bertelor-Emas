@@ -102,7 +102,9 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <IncludePath>./;$(IncludePath)</IncludePath>
+        <BCC_AsmToObj>true</BCC_AsmToObj>
+        <BCC_EnableExceptionHandling>false</BCC_EnableExceptionHandling>
+        <BCC_EnableRTTI>false</BCC_EnableRTTI>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>None</Manifest_File>
@@ -121,6 +123,12 @@
         <PCHCompile Include="ayam.h">
             <BuildOrder>0</BuildOrder>
         </PCHCompile>
+        <CppCompile Include="darray.c">
+            <BuildOrder>2</BuildOrder>
+        </CppCompile>
+        <None Include="darray.h">
+            <BuildOrder>3</BuildOrder>
+        </None>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
