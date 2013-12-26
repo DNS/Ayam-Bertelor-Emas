@@ -1,5 +1,5 @@
 
-/*
+/* 
 Project : Dynamic Array - Hashed Array Tree
 Status  : Complete
 Author  : Daniel Sirait <dns@cpan.org>
@@ -14,23 +14,13 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 */
 
 #include "darray.h"
-/*
-// TODO: FUTURE, elements data type can be assigned at runtime
-#define array_new(arr, datatype) \
-	ARRAY *arr;			\
-	arr = malloc(sizeof(ARRAY));	\
-	arr->blocks = malloc(sizeof(ARRAY_BLOCK));	\
-	arr->blocks[0].elements = malloc(sizeof(datatype) * ARRAY_BLOCK_CAPACITY);	\
-	arr->element_size = 0;	\
-	arr->block_size = 1;	\
-	arr->capacity = ARRAY_BLOCK_CAPACITY;
-*/
 
-ARRAY *array_new (void) {
-	ARRAY *arr;
-	arr = malloc(sizeof(ARRAY));
+
+ARRAY_FLOAT *arrayFloat_new () {
+	ARRAY_FLOAT *arr;
+	arr = malloc(sizeof(ARRAY_FLOAT));
 	if (arr == NULL) return NULL;
-	arr->blocks = malloc(sizeof(ARRAY_BLOCK));
+	arr->blocks = malloc(sizeof(ARRAY_FLOAT_BLOCK));
 	arr->blocks[0].elements = malloc(sizeof(float) * ARRAY_BLOCK_CAPACITY);
 	arr->element_size = 0;
 	arr->block_size = 1;
@@ -39,180 +29,305 @@ ARRAY *array_new (void) {
 }
 
 
-void array_destroy (ARRAY *arr) {
-	array_clear(arr);
+void arrayFloat_destroy (ARRAY_FLOAT *arr) {
+	arrayFloat_clear(arr);
 	free(arr->blocks[0].elements);
 	free(arr->blocks);
 	free(arr);
 }
 
-void array_add (ARRAY *arr, float val) {
+void arrayFloat_add (ARRAY_FLOAT *arr, float val) {
 	DWORD curr_index;
-
+	
 	if (arr->element_size < arr->capacity) {
 		curr_index = ARRAY_BLOCK_CAPACITY - (arr->capacity - arr->element_size);
-
+		
 		arr->blocks[arr->block_size-1].elements[curr_index] = val;
-
+		
 		//printf("%d\n", *(DWORD*)arr->blocks[0].elements[0]);
-
+		
 		arr->element_size++;
 	} else {
-		arr->blocks = realloc(arr->blocks, (arr->block_size+1) * sizeof(ARRAY_BLOCK));
+		arr->blocks = realloc(arr->blocks, (arr->block_size+1) * sizeof(ARRAY_FLOAT_BLOCK));
 		arr->blocks[arr->block_size].elements = malloc(sizeof(float) * ARRAY_BLOCK_CAPACITY);
-
-
+		
+		
 		arr->blocks[arr->block_size].elements[0] = val;
-
+		
 		arr->block_size++;
 		arr->element_size++;
 		arr->capacity += ARRAY_BLOCK_CAPACITY;
 	}
 }
 
-DWORD array_size (ARRAY *arr) {
+DWORD arrayFloat_size (ARRAY_FLOAT *arr) {
 	return arr->element_size;
 }
 
-float array_get (ARRAY *arr, DWORD index) {
-
+float arrayFloat_get (ARRAY_FLOAT *arr, DWORD index) {
+	
 	//printf("%d\n", *(DWORD*)arr->blocks[0].elements[0]);
-
+	
 	DWORD block_index, el_index;
 	block_index = index / ARRAY_BLOCK_CAPACITY;
 	el_index = index % ARRAY_BLOCK_CAPACITY;
-
+	
 	return arr->blocks[block_index].elements[el_index];
 }
 
 
-bool array_set (ARRAY *arr, DWORD index, float val) {
+bool arrayFloat_set (ARRAY_FLOAT *arr, DWORD index, float val) {
 	DWORD block_index;
 	DWORD el_index;
-
-	if (array_size(arr)-1 < index)
+	
+	if (arrayFloat_size(arr)-1 < index)
 		return false;
-
+	
 	block_index = index / ARRAY_BLOCK_CAPACITY;
 	el_index = index % ARRAY_BLOCK_CAPACITY;
 	arr->blocks[block_index].elements[el_index] = val;
-
+	
 	return true;
 }
 
 
 
-void array_remove (ARRAY *arr, DWORD index) {
+void arrayFloat_remove (ARRAY_FLOAT *arr, DWORD index) {
 	DWORD el_index, size, i, remainder;
-
-	size = array_size(arr);
-
+	
+	size = arrayFloat_size(arr);
+	
 	// TODO: SLOW, OPTIMIZE IN array_removeRange()
 	for (i=index; i<size; i++) {
 		if (i < size-1)
-			array_set(arr, i, array_get(arr, i+1));
+			arrayFloat_set(arr, i, arrayFloat_get(arr, i+1));
 	}
-
+	
 	el_index = index % ARRAY_BLOCK_CAPACITY;
-
+	
 	remainder = arr->capacity - arr->element_size;
 	//printf("%d\n", t);
 	if (el_index == 0 && arr->block_size > 1 && remainder > ARRAY_BLOCK_CAPACITY) {
 		arr->block_size--;
 		free(arr->blocks[arr->block_size].elements);
 		//printf("el_index: %d\nblock_size: %d\n", el_index, arr->block_size);
-		arr->blocks = realloc(arr->blocks, arr->block_size * sizeof(ARRAY_BLOCK));
+		arr->blocks = realloc(arr->blocks, arr->block_size * sizeof(ARRAY_FLOAT_BLOCK));
 		arr->capacity = ARRAY_BLOCK_CAPACITY * arr->block_size;
 	}
-
-
-
+	
+	
+	
 	if (arr->element_size != 0)
 		arr->element_size--;
-
+	
 }
 
-void array_clear (ARRAY *arr) {
+void arrayFloat_clear (ARRAY_FLOAT *arr) {
 	DWORD i, block_size;
-
-	block_size = array_size(arr);
-
+	
+	block_size = arrayFloat_size(arr);
+	
 	for (i=1; i<arr->block_size; i++)
 		free(arr->blocks[i].elements);
-
-	arr->blocks = realloc(arr->blocks, 1 * sizeof(ARRAY_BLOCK));
+	
+	arr->blocks = realloc(arr->blocks, 1 * sizeof(ARRAY_FLOAT_BLOCK));
 	arr->element_size = 0;
 	arr->block_size = 1;
 	arr->capacity = ARRAY_BLOCK_CAPACITY;
 }
 
-
-
-
 /* TODO: SLOW, NEED OPTIMIZATION */
-bool array_remove_range (ARRAY *arr, DWORD fromIndex, DWORD toIndex) {
+bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
 	DWORD i, total_remove, removed_block, size;
 	DWORD startBlock, endCopyBlock, endBlock, currBlock, currIndex;
+    DWORD new_element_size;
 
-	if (fromIndex > toIndex) return false;
-
-	size = array_size(arr);
+	div_t x, z;
+	
+	size = arrayFloat_size(arr);
+	
+	if (fromIndex > toIndex || fromIndex < 0 || toIndex > size || arr->element_size <= 0) return false;
+	
+	
+	/*
+	// SLOW METHOD
+	size = arrayFloat_size(arr);
 	total_remove = toIndex - fromIndex + 1;
 	removed_block = (toIndex - fromIndex) / ARRAY_BLOCK_CAPACITY;
-
-
+	
 	//printf("%d\n", total_remove);
 	for (i=fromIndex; i<fromIndex+total_remove; i++)
-		array_remove(arr, fromIndex);	// SLOW !!!
-
+		arrayFloat_remove(arr, fromIndex);	// SLOW !!!
+	
 	arr->element_size -= total_remove;
 	arr->block_size -= total_remove / ARRAY_BLOCK_CAPACITY;
 	arr->capacity = ARRAY_BLOCK_CAPACITY * arr->block_size;
-
-
-		/*
-
-	//startBlock = fromIndex / ARRAY_BLOCK_CAPACITY;
-	//endCopyBlock = toIndex / ARRAY_BLOCK_CAPACITY;
-	endBlock = toIndex / ARRAY_BLOCK_CAPACITY;
-
-	//printf("%d - %d\n", endBlock, removed_block);
-
-
-
-
-
-	for (i=fromIndex; i<200; i++) {
-		currBlock = i / ARRAY_BLOCK_CAPACITY;
-		currIndex = i % ARRAY_BLOCK_CAPACITY;
-
-
-
-		//if (currBlock+removed_block != endBlock)
-			//printf("%d: %d\n", currBlock, currBlock+removed_block);
-			arr->blocks[currBlock].elements[currIndex] = arr->blocks[currBlock+endBlock].elements[currIndex];
-
-
-
-	}
 	*/
+	total_remove = toIndex - fromIndex + 1;
+	
+	for (i=fromIndex; i<size; i++) {
+		x = div(i, ARRAY_BLOCK_CAPACITY);
+		z = div(i + total_remove, ARRAY_BLOCK_CAPACITY);
+		if (i + total_remove < size) {
+			arr->blocks[x.quot].elements[x.rem] = arr->blocks[z.quot].elements[z.rem];
+		}
+		
+	}
 
-	//free(arr->blocks[i+total_remove].elements);
-	//arr->blocks = realloc(arr->blocks, (arr->block_size) * sizeof(ARRAY_BLOCK));
+	new_element_size = arr->element_size - total_remove;
 
+	if (new_element_size >= 0) {
+		arr->element_size -= total_remove;
+		//printf("%d\n", arr->element_size);
+	}
+	
+	if (arr->block_size > 1) {
+		arr->block_size -= total_remove / ARRAY_BLOCK_CAPACITY;
+		arr->blocks = realloc(arr->blocks, arr->block_size * ARRAY_BLOCK_CAPACITY * sizeof(float));
+	}
+	
+	arr->capacity = ARRAY_BLOCK_CAPACITY * arr->block_size;
+	
 	return true;
 }
 
-void array_iterate (ARRAY *arr, void (*callback)(DWORD index, float val)) {
+/* shrink to size */
+bool arrayFloat_shrink(ARRAY_FLOAT *arr, DWORD shrink_size) {
+	DWORD size, shrink_index;
+	size = arrayFloat_size(arr);
+	
+	if (shrink_size >= size) return false;
+	
+	arrayFloat_trim(arr, shrink_size, size-1);
+	
+	return true;
+}
+
+void arrayFloat_iterator (ARRAY_FLOAT *arr, void (*callback)(DWORD index, float val)) {
 	DWORD i, size;
-	size = array_size(arr);
-	//printf("%d\n", *(DWORD*)arr->blocks[0].elements[0]);
+	size = arrayFloat_size(arr);
 	for (i=0; i<size; i++) {
-		//array_get(arr, 0);
-		callback(i, array_get(arr, i));
+		callback(i, arrayFloat_get(arr, i));
 	}
 }
 
-float array_last (ARRAY *arr) {
-	return array_get(arr, arr->element_size - 1);
+float arrayFloat_last (ARRAY_FLOAT *arr) {
+	return arrayFloat_get(arr, arr->element_size - 1);
 }
+
+DWORD arrayFloat_indexOf (ARRAY_FLOAT *arr, float val) {
+	DWORD index, i, size;
+	size = arrayFloat_size(arr);
+	for (i=0; i<size; i++) {
+		if (val == arrayFloat_get(arr, i))
+			return i;
+	}
+	
+	return -1;
+}
+
+DWORD arrayFloat_lastIndexOf (ARRAY_FLOAT *arr, float val) {
+	DWORD index, i, size;
+	size = arrayFloat_size(arr);
+	for (i=size-1; i>=0; i++) {
+		if (val == arrayFloat_get(arr, i))
+			return i;
+	}
+	
+	return -1;
+}
+
+/*
+double get_time () {
+	LARGE_INTEGER t, f;
+	QueryPerformanceCounter(&t);
+	QueryPerformanceFrequency(&f);
+	return (double)t.QuadPart/(double)f.QuadPart;
+}
+
+void cetak (DWORD index, float val) {
+	printf("%d: %f\n", index, val);
+}
+
+
+void benchmark () {
+	double start, stop;
+	ARRAY_FLOAT *arr;
+	DWORD i, *j, *tmp;
+	
+	start = get_time();
+	
+	arr = arrayFloat_new();
+	
+
+	for (i=0; i<100; i++) {
+		arrayFloat_add(arr, (float) i);
+	}
+
+	
+	//arrayFloat_shrink(arr, 50);
+	
+	
+	
+	//arrayFloat_trim(arr, 0, 49);
+	//arrayFloat_shrink(arr, 0);
+	//arrayFloat_iterator(arr, cetak);
+	printf("%d\n", arrayFloat_indexOf(arr, 5.2f));
+	//Sleep(5000);
+	
+	//arrayFloat_remove(arr, 1);
+	
+	
+	
+	
+	//arrayFloat_get(arr, 1);
+	
+	
+	stop = get_time();
+	//printf("%f s\n", stop - start);
+	
+	
+
+	
+	
+
+	
+	arrayFloat_destroy(arr);
+	
+	//puts("Sleeping..");
+	//Sleep(5000);
+}
+
+#define func_new(a, x) typedef struct { x element; size } XYZ; XYZ a;
+
+int main () {
+	benchmark();
+	//div_t x = div(10, 8);
+
+	//printf("%d, %d\n", x.quot, x.rem);
+	
+	//Sleep(5000);
+	//system("pause");
+	return 0;
+}
+*/
+
+
+
+
+
+
+
+	/*
+	Total iteration: 10000000ULL
+	ARRAY_BLOCK_CAPACITY : time elapsed (s)
+	4: 29.681812 s
+	8: 7.776598 s
+	16: 2.062090 s
+	32: 0.599660 s
+	64: 0.224080 s
+	128: 0.179183 s
+	256: 0.158923 s
+	512: 0.145158 s
+	1024: 0.136236 s
+	*/

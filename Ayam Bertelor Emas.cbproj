@@ -102,9 +102,13 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <BCC_UserSuppliedOptions>-W</BCC_UserSuppliedOptions>
+        <VerInfo_DLL>true</VerInfo_DLL>
+        <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
+        <BCC_InstructionSet>6</BCC_InstructionSet>
+        <VerInfo_PreRelease>true</VerInfo_PreRelease>
+        <VerInfo_Debug>true</VerInfo_Debug>
         <BCC_AsmToObj>true</BCC_AsmToObj>
-        <BCC_EnableExceptionHandling>false</BCC_EnableExceptionHandling>
-        <BCC_EnableRTTI>false</BCC_EnableRTTI>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>None</Manifest_File>
@@ -124,7 +128,7 @@
             <BuildOrder>0</BuildOrder>
         </PCHCompile>
         <CppCompile Include="darray.c">
-            <BuildOrder>2</BuildOrder>
+            <BuildOrder>0</BuildOrder>
         </CppCompile>
         <None Include="darray.h">
             <BuildOrder>3</BuildOrder>
