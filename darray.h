@@ -20,6 +20,8 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 #include <tchar.h>
 #include <windows.h>
 
+#ifndef _DARRAY_H
+#define _DARRAY_H
 
 #ifndef BYTE
 typedef unsigned char BYTE;
@@ -39,7 +41,7 @@ typedef unsigned long long QWORD;
 
 
 
-#define ARRAY_BLOCK_CAPACITY 8	/* default size 8 */
+#define ARRAY_BLOCK_CAPACITY 512	/* default size 8 */
 
 typedef struct _ARRAY_FLOAT_BLOCK {
 	float *elements;
@@ -69,4 +71,4 @@ bool arrayFloat_shrink(ARRAY_FLOAT *arr, DWORD shrink_size);
 DWORD arrayFloat_indexOf (ARRAY_FLOAT *arr, float val);
 DWORD arrayFloat_lastIndexOf (ARRAY_FLOAT *arr, float val);
 
-
+#endif

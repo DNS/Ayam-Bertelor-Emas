@@ -50,6 +50,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <RunBCCOutOfProcess>true</RunBCCOutOfProcess>
         <_TCHARMapping>char</_TCHARMapping>
         <ProjectType>CppDynamicLibrary</ProjectType>
         <IncludePath>D:\SANDBOX\Expert Advisor\;$(IncludePath)</IncludePath>
@@ -102,12 +103,8 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <BCC_UserSuppliedOptions>-W</BCC_UserSuppliedOptions>
-        <VerInfo_DLL>true</VerInfo_DLL>
         <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
         <BCC_InstructionSet>6</BCC_InstructionSet>
-        <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Debug>true</VerInfo_Debug>
         <BCC_AsmToObj>true</BCC_AsmToObj>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -122,13 +119,13 @@
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="ayam.c">
-            <BuildOrder>1</BuildOrder>
+            <BuildOrder>3</BuildOrder>
         </CppCompile>
         <PCHCompile Include="ayam.h">
             <BuildOrder>0</BuildOrder>
         </PCHCompile>
         <CppCompile Include="darray.c">
-            <BuildOrder>0</BuildOrder>
+            <BuildOrder>2</BuildOrder>
         </CppCompile>
         <None Include="darray.h">
             <BuildOrder>3</BuildOrder>

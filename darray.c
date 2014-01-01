@@ -138,10 +138,9 @@ void arrayFloat_clear (ARRAY_FLOAT *arr) {
 
 /* TODO: SLOW, NEED OPTIMIZATION */
 bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
-	DWORD i, total_remove, removed_block, size;
+	DWORD i, total_remove, removed_block, size, new_element_size;
 	DWORD startBlock, endCopyBlock, endBlock, currBlock, currIndex;
-    DWORD new_element_size;
-
+	DWORD old_block_size, new_block_size;
 	div_t x, z;
 	
 	size = arrayFloat_size(arr);
@@ -173,16 +172,22 @@ bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
 		}
 		
 	}
-
+	
 	new_element_size = arr->element_size - total_remove;
-
+	
 	if (new_element_size >= 0) {
 		arr->element_size -= total_remove;
-		//printf("%d\n", arr->element_size);
 	}
 	
 	if (arr->block_size > 1) {
+		old_block_size = arr->block_size; 
 		arr->block_size -= total_remove / ARRAY_BLOCK_CAPACITY;
+		new_block_size = arr->block_size;
+		
+		for (i=old_block_size-1; i>=new_block_size; i--) {
+			free(arr->blocks[i].elements);
+		}
+		
 		arr->blocks = realloc(arr->blocks, arr->block_size * ARRAY_BLOCK_CAPACITY * sizeof(float));
 	}
 	
@@ -237,97 +242,3 @@ DWORD arrayFloat_lastIndexOf (ARRAY_FLOAT *arr, float val) {
 	return -1;
 }
 
-/*
-double get_time () {
-	LARGE_INTEGER t, f;
-	QueryPerformanceCounter(&t);
-	QueryPerformanceFrequency(&f);
-	return (double)t.QuadPart/(double)f.QuadPart;
-}
-
-void cetak (DWORD index, float val) {
-	printf("%d: %f\n", index, val);
-}
-
-
-void benchmark () {
-	double start, stop;
-	ARRAY_FLOAT *arr;
-	DWORD i, *j, *tmp;
-	
-	start = get_time();
-	
-	arr = arrayFloat_new();
-	
-
-	for (i=0; i<100; i++) {
-		arrayFloat_add(arr, (float) i);
-	}
-
-	
-	//arrayFloat_shrink(arr, 50);
-	
-	
-	
-	//arrayFloat_trim(arr, 0, 49);
-	//arrayFloat_shrink(arr, 0);
-	//arrayFloat_iterator(arr, cetak);
-	printf("%d\n", arrayFloat_indexOf(arr, 5.2f));
-	//Sleep(5000);
-	
-	//arrayFloat_remove(arr, 1);
-	
-	
-	
-	
-	//arrayFloat_get(arr, 1);
-	
-	
-	stop = get_time();
-	//printf("%f s\n", stop - start);
-	
-	
-
-	
-	
-
-	
-	arrayFloat_destroy(arr);
-	
-	//puts("Sleeping..");
-	//Sleep(5000);
-}
-
-#define func_new(a, x) typedef struct { x element; size } XYZ; XYZ a;
-
-int main () {
-	benchmark();
-	//div_t x = div(10, 8);
-
-	//printf("%d, %d\n", x.quot, x.rem);
-	
-	//Sleep(5000);
-	//system("pause");
-	return 0;
-}
-*/
-
-
-
-
-
-
-
-	/*
-	Total iteration: 10000000ULL
-	ARRAY_BLOCK_CAPACITY : time elapsed (s)
-	4: 29.681812 s
-	8: 7.776598 s
-	16: 2.062090 s
-	32: 0.599660 s
-	64: 0.224080 s
-	128: 0.179183 s
-	256: 0.158923 s
-	512: 0.145158 s
-	1024: 0.136236 s
-	*/

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <ctype.h>
 #include <tchar.h>
 #include <stdbool.h>
@@ -12,11 +13,16 @@
 #include "ayam.h"
 #include "darray.h"
 
+#define DEBUG 1
+
 
 DWORD period;
 ARRAY_FLOAT *prices;
 ARRAY_FLOAT *sma;
 ARRAY_FLOAT *stddev;
+
+float sd_max;
+char buf[512];
 
 int _libmain (unsigned long reason) {
 	return 1;
@@ -26,7 +32,7 @@ int _libmain (unsigned long reason) {
 
 
 void test_test_123 () {
-	MessageBox(NULL, "Ayam Bertelor Emas Launched!", "Result", MB_OK);
+	MessageBox(NULL, "Ayam Bertelor Emas Launched!", "Initialization", MB_OK);
 }
 
 void calc_sma () {
@@ -36,16 +42,18 @@ void calc_sma () {
 	last_index = size - 1;
 	if (size > period) {
     	tmp = 0.0f;
-		for (i=last_index; i<(last_index-period); i++) {
+		for (i=last_index; i>(last_index-period); i--) {
             tmp += arrayFloat_get(prices, i);
 
 		}
-        mean = tmp / period;
+        mean = (float) tmp / period;
         arrayFloat_add(sma, mean);
 
+
 	} else {
-		arrayFloat_add(sma, -1);
+		arrayFloat_add(sma, -1.0f);
 	}
+    
 }
 
 /* calc_stddev() must be called after calc_sma() */
@@ -57,45 +65,88 @@ void calc_stddev () {
 	if (size > period) {
         tmp = 0.0f;
         mean = arrayFloat_get(sma, last_index);
-        for (i=last_index; i<(last_index-period); i++) {
-             tmp += pow( arrayFloat_get(prices, i) - mean, 2);
+        for (i=last_index; i>(last_index-period); i--) {
+             tmp += pow( (arrayFloat_get(prices,i) - mean), 2);
         }
-        sd = pow(tmp, (double) 5e-1);	/* sqrt(x), x^1/2, x^0.5, x^5e-1 */
+        sd = pow(tmp / period, (double) 5e-1);		/* sqrt(x), x^1/2, x^0.5f, x^5e-1 */
         arrayFloat_add(stddev, sd);
 
+
+
     } else {
-        arrayFloat_add(stddev, -1);
+        arrayFloat_add(stddev, -1.0f);
     }
 }
 
 __declspec(dllexport) void __cdecl ayam_init (DWORD _period) {
-	test_test_123();
 	period = _period;
 	prices = arrayFloat_new();
+    sma = arrayFloat_new();
+    stddev = arrayFloat_new();
+
+	sd_max = 0.0f;
+
+	//if (prices != NULL && sma != NULL && stddev != NULL)
+		//test_test_123();
+
+
+	
 }
 
 
 
-__declspec(dllexport) void __cdecl ayam_start (double tick) {
-	char buf[256];
+__declspec(dllexport) DWORD __cdecl ayam_start (double tick) {
+    DWORD size;
+    size = arrayFloat_size(prices);
 
 	arrayFloat_add(prices, (float) tick);
-	
-	sprintf(buf, "Price: %f\nOk!", arrayFloat_last(prices));
-
-	MessageBox(NULL, buf, "Result", MB_OK);
 
 	calc_sma();
 	calc_stddev();
-	
+
+    if (sd_max < arrayFloat_last(stddev) ) {
+		sd_max = arrayFloat_last(stddev);
+	}
+
+
+    return enter_market();
 }
 
 
 
 __declspec(dllexport) void __cdecl ayam_deinit () {
+	sprintf(buf, "sd_max: %f\n", sd_max);
+	MessageBox(NULL, buf, "sd_max", MB_OK);
+
 	arrayFloat_destroy(prices);
     arrayFloat_destroy(stddev);
     arrayFloat_destroy(sma);
+}
+
+
+
+DWORD enter_market () {
+	DWORD size;
+	char signal[256];
+	size = arrayFloat_size(prices);
+    strcpy(signal, "");
+
+	if (size > period) {
+		if (DEBUG == 1) {
+			if (arrayFloat_last(stddev) > 0.0002f) {
+				if (arrayFloat_last(prices) > arrayFloat_last(sma)) {
+					strcpy(signal, "BUY");
+                    return MARKET_BUY;
+				} else {
+					strcpy(signal, "SELL");
+                    return MARKET_SELL;
+                }
+			}
+			//sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", arrayFloat_last(prices), arrayFloat_last(sma), arrayFloat_last(stddev), signal);
+
+			//MessageBox(NULL, buf, "enter_market", MB_OK);
+		}
+	}
 }
 
 
