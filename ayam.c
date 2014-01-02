@@ -38,7 +38,7 @@ void test_test_123 () {
 void calc_sma () {
 	DWORD last_index, size, i;
 	float tick, mean, tmp;
-    size = arrayFloat_size(prices);
+	size = arrayFloat_size(prices);
 	last_index = size - 1;
 	if (size > period) {
     	tmp = 0.0f;
@@ -58,31 +58,31 @@ void calc_sma () {
 
 /* calc_stddev() must be called after calc_sma() */
 void calc_stddev () {
-    DWORD last_index, size, i;
+	DWORD last_index, size, i;
 	float tick, mean, tmp, sd;
-    size = arrayFloat_size(prices);
+	size = arrayFloat_size(prices);
 	last_index = size - 1;
 	if (size > period) {
-        tmp = 0.0f;
-        mean = arrayFloat_get(sma, last_index);
-        for (i=last_index; i>(last_index-period); i--) {
-             tmp += pow( (arrayFloat_get(prices,i) - mean), 2);
-        }
-        sd = pow(tmp / period, (double) 5e-1);		/* sqrt(x), x^1/2, x^0.5f, x^5e-1 */
-        arrayFloat_add(stddev, sd);
+		tmp = 0.0f;
+		mean = arrayFloat_get(sma, last_index);
+		for (i=last_index; i>(last_index-period); i--) {
+			tmp += pow( (arrayFloat_get(prices,i) - mean), 2);
+		}
+		sd = pow(tmp / period, (double) 5e-1);		/* sqrt(x), x^1/2, x^0.5f, x^5e-1 */
+		arrayFloat_add(stddev, sd);
 
 
 
-    } else {
-        arrayFloat_add(stddev, -1.0f);
-    }
+	} else {
+		arrayFloat_add(stddev, -1.0f);
+	}
 }
 
 __declspec(dllexport) void __cdecl ayam_init (DWORD _period) {
 	period = _period;
 	prices = arrayFloat_new();
-    sma = arrayFloat_new();
-    stddev = arrayFloat_new();
+	sma = arrayFloat_new();
+	stddev = arrayFloat_new();
 
 	sd_max = 0.0f;
 
@@ -96,15 +96,15 @@ __declspec(dllexport) void __cdecl ayam_init (DWORD _period) {
 
 
 __declspec(dllexport) DWORD __cdecl ayam_start (double tick) {
-    DWORD size;
-    size = arrayFloat_size(prices);
+	DWORD size;
+	size = arrayFloat_size(prices);
 
 	arrayFloat_add(prices, (float) tick);
 
 	calc_sma();
 	calc_stddev();
 
-    if (sd_max < arrayFloat_last(stddev) ) {
+	if (sd_max < arrayFloat_last(stddev) ) {
 		sd_max = arrayFloat_last(stddev);
 	}
 
@@ -119,8 +119,8 @@ __declspec(dllexport) void __cdecl ayam_deinit () {
 	MessageBox(NULL, buf, "sd_max", MB_OK);
 
 	arrayFloat_destroy(prices);
-    arrayFloat_destroy(stddev);
-    arrayFloat_destroy(sma);
+	arrayFloat_destroy(stddev);
+	arrayFloat_destroy(sma);
 }
 
 
@@ -129,7 +129,7 @@ DWORD enter_market () {
 	DWORD size;
 	char signal[256];
 	size = arrayFloat_size(prices);
-    strcpy(signal, "");
+	strcpy(signal, "");
 
 	if (size > period) {
 		if (DEBUG == 1) {
