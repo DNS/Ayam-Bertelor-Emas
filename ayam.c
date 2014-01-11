@@ -7,11 +7,12 @@
 #include <math.h>
 #include <ctype.h>
 #include <tchar.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <windows.h>
 
-#include "ayam.h"
 #include "darray.h"
+#include "ayam.h"
+
 
 #define DEBUG 1
 
