@@ -1,30 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2013/12/23 01:32:58.000.428,=C:\Users\dns\Documents\RAD Studio\Projects\File2.c</Transaction>
     <Transaction>2013/12/23 01:32:58.000.425,=C:\Users\dns\Documents\RAD Studio\Projects\Project5PCH1.h</Transaction>
-    <Transaction>2013/12/23 01:33:12.000.030,C:\Users\dns\Documents\RAD Studio\Projects\File2.c=D:\SANDBOX\Expert Advisor\ayam.c</Transaction>
-    <Transaction>2013/12/23 01:33:24.000.177,C:\Users\dns\Documents\RAD Studio\Projects\Project5PCH1.h=D:\SANDBOX\Expert Advisor\ayam.h</Transaction>
-    <Transaction>2013/12/23 01:33:31.000.199,C:\Users\dns\Documents\RAD Studio\Projects\Project5.cbproj=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas.cbproj</Transaction>
+    <Transaction>2013/12/23 01:32:58.000.428,=C:\Users\dns\Documents\RAD Studio\Projects\File2.c</Transaction>
+    <Transaction>2013/12/23 01:33:12.000.030,D:\SANDBOX\Expert Advisor\ayam.c=C:\Users\dns\Documents\RAD Studio\Projects\File2.c</Transaction>
+    <Transaction>2013/12/23 01:33:24.000.177,D:\SANDBOX\Expert Advisor\ayam.h=C:\Users\dns\Documents\RAD Studio\Projects\Project5PCH1.h</Transaction>
+    <Transaction>2013/12/23 01:33:31.000.199,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas.cbproj=C:\Users\dns\Documents\RAD Studio\Projects\Project5.cbproj</Transaction>
     <Transaction>2013/12/23 02:49:16.000.665,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.c</Transaction>
-    <Transaction>2013/12/23 02:49:31.000.484,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\test.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.c</Transaction>
+    <Transaction>2013/12/23 02:49:31.000.484,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\test.c</Transaction>
     <Transaction>2013/12/23 02:49:39.000.420,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\test.c=</Transaction>
     <Transaction>2013/12/23 02:56:05.000.160,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.c</Transaction>
-    <Transaction>2013/12/23 02:56:37.000.758,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\darray.h</Transaction>
     <Transaction>2013/12/23 02:56:37.000.755,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\darray.c</Transaction>
+    <Transaction>2013/12/23 02:56:37.000.758,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\darray.h</Transaction>
     <Transaction>2013/12/30 19:32:41.000.688,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.cpp</Transaction>
-    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.h=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.h</Transaction>
-    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.cpp</Transaction>
-    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.dfm=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.dfm</Transaction>
+    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.cpp</Transaction>
+    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.h=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.h</Transaction>
+    <Transaction>2013/12/30 19:33:16.000.684,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.dfm=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\Unit1.dfm</Transaction>
     <Transaction>2013/12/30 19:33:45.000.847,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.cpp</Transaction>
-    <Transaction>2013/12/30 19:34:10.000.712,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui-wrapper.cpp</Transaction>
-    <Transaction>2013/12/30 19:42:12.000.750,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c</Transaction>
-    <Transaction>2013/12/30 19:42:23.000.113,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c</Transaction>
-    <Transaction>2013/12/30 19:42:43.000.341,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.cpp</Transaction>
-    <Transaction>2013/12/30 19:42:50.000.548,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c</Transaction>
-    <Transaction>2013/12/30 19:44:56.000.011,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui-wrapper.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.cpp</Transaction>
+    <Transaction>2013/12/30 19:34:10.000.712,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui-wrapper.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.cpp</Transaction>
+    <Transaction>2013/12/30 19:42:12.000.750,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c</Transaction>
+    <Transaction>2013/12/30 19:42:23.000.113,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c</Transaction>
+    <Transaction>2013/12/30 19:42:43.000.341,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.cpp</Transaction>
+    <Transaction>2013/12/30 19:42:50.000.548,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam.c=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\ayam2.c</Transaction>
+    <Transaction>2013/12/30 19:44:56.000.011,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.cpp=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui-wrapper.cpp</Transaction>
     <Transaction>2013/12/30 19:45:13.000.110,=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.h</Transaction>
-    <Transaction>2013/12/30 19:45:24.000.359,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.h=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.h</Transaction>
+    <Transaction>2013/12/30 19:45:24.000.359,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.h=D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\File1.h</Transaction>
     <Transaction>2013/12/30 20:21:42.000.049,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\gui.cpp=</Transaction>
     <Transaction>2013/12/30 20:21:42.000.072,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.h=</Transaction>
     <Transaction>2013/12/30 20:21:42.000.070,D:\SANDBOX\Expert Advisor\Ayam Bertelor Emas\guiwrapper.cpp=</Transaction>

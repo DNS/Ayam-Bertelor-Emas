@@ -24,8 +24,15 @@ ARRAY_FLOAT *stddev;
 float sd_max;
 char buf[512];
 
-int _libmain (unsigned long reason) {
-	return 1;
+BOOL APIENTRY DllMain (HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+	switch (ul_reason_for_call) {
+		case DLL_PROCESS_ATTACH:
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+	}
+	return TRUE;
 }
 
 
@@ -78,7 +85,7 @@ void calc_stddev () {
 	}
 }
 
-__declspec(dllexport) void __cdecl ayam_init (DWORD _period) {
+void ayam_init (DWORD _period) {
 	period = _period;
 	prices = arrayFloat_new();
 	sma = arrayFloat_new();
@@ -95,7 +102,7 @@ __declspec(dllexport) void __cdecl ayam_init (DWORD _period) {
 
 
 
-__declspec(dllexport) DWORD __cdecl ayam_start (double tick) {
+DWORD ayam_start (double tick) {
 	DWORD size;
 	size = arrayFloat_size(prices);
 
@@ -114,7 +121,7 @@ __declspec(dllexport) DWORD __cdecl ayam_start (double tick) {
 
 
 
-__declspec(dllexport) void __cdecl ayam_deinit () {
+void ayam_deinit () {
 	sprintf(buf, "sd_max: %f\n", sd_max);
 	MessageBox(NULL, buf, "sd_max", MB_OK);
 

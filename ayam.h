@@ -4,7 +4,9 @@
 
 #include "darray.h"
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define MARKET_FLAT 0
 #define MARKET_BUY 1
@@ -16,10 +18,14 @@ void test_test_123 ();
 void calc_sma ();
 void calc_stddev ();
 
-void ayam_init (DWORD _period);
-DWORD ayam_start (double tick);
-void ayam_deinit ();
+__declspec(dllexport) void __cdecl ayam_init (DWORD _period);
+__declspec(dllexport) DWORD __cdecl ayam_start (double tick);
+__declspec(dllexport) void __cdecl ayam_deinit ();
 
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif
