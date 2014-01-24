@@ -1,13 +1,15 @@
 
 //#pragma argsused
 
+#undef UNICODE	// use 7-bit ASCII
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
 #include <tchar.h>
-//#include <stdbool.h>
+#include <stdbool.h>
 #include <windows.h>
 
 #include "darray.h"
@@ -25,9 +27,11 @@ ARRAY_FLOAT *stddev;
 float sd_max;
 char buf[512];
 
-BOOL APIENTRY DllMain (HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
-	switch (ul_reason_for_call) {
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID Reserved) {
+	switch (nReason) {
 		case DLL_PROCESS_ATTACH:
+			//DisableThreadLibraryCalls(hModule);	//  For optimization
+			break;
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:
 		case DLL_PROCESS_DETACH:
@@ -40,7 +44,7 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 
 
 void test_test_123 () {
-	MessageBox(NULL, "Ayam Bertelor Emas Launched!", "Initialization", MB_OK);
+	MessageBoxA(NULL, "Ayam Bertelor Emas Launched!", "Initialization", MB_OK);
 }
 
 void calc_sma () {
@@ -124,7 +128,7 @@ DWORD ayam_start (double tick) {
 
 void ayam_deinit () {
 	sprintf(buf, "sd_max: %f\n", sd_max);
-	MessageBox(NULL, buf, "sd_max", MB_OK);
+	MessageBoxA(NULL, buf, "sd_max", MB_OK);
 
 	arrayFloat_destroy(prices);
 	arrayFloat_destroy(stddev);
@@ -133,7 +137,7 @@ void ayam_deinit () {
 
 
 
-DWORD enter_market () {
+FORECAST enter_market() {
 	DWORD size;
 	char signal[256];
 	size = arrayFloat_size(prices);
@@ -144,17 +148,18 @@ DWORD enter_market () {
 			if (arrayFloat_last(stddev) > 0.0002f) {
 				if (arrayFloat_last(prices) > arrayFloat_last(sma)) {
 					strcpy(signal, "BUY");
-                    return MARKET_BUY;
+                    return BUY;
 				} else {
 					strcpy(signal, "SELL");
-                    return MARKET_SELL;
+                    return SELL;
                 }
 			}
 			//sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", arrayFloat_last(prices), arrayFloat_last(sma), arrayFloat_last(stddev), signal);
 
-			//MessageBox(NULL, buf, "enter_market", MB_OK);
+			//MessageBoxA(NULL, buf, "enter_market", MB_OK);
 		}
 	}
 }
 
 
+//MessageBoxA(NULL, "asd", "enter_market", MB_OK);

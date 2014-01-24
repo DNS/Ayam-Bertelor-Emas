@@ -16,7 +16,7 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <stdbool.h>
+#include <stdbool.h>
 #include <tchar.h>
 #include <windows.h>
 
@@ -24,9 +24,9 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 #define _DARRAY_H
 
 
-#define bool BOOL
-#define true TRUE
-#define false FALSE
+//#define bool BOOL
+//#define true TRUE
+//#define false FALSE
 
 
 #ifndef BYTE

@@ -2,18 +2,18 @@
 #ifndef _AYAM_H
 #define _AYAM_H
 
-#include "darray.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define MARKET_FLAT 0
-#define MARKET_BUY 1
-#define MARKET_SELL 2
+typedef enum {
+	FLAT = 0,
+	BUY = 1,
+	SELL = 2
+} FORECAST;
 
-
-DWORD enter_market ();
+FORECAST enter_market();
 void test_test_123 ();
 void calc_sma ();
 void calc_stddev ();
