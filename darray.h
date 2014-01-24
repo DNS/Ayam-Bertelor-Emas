@@ -24,11 +24,6 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 #define _DARRAY_H
 
 
-//#define bool BOOL
-//#define true TRUE
-//#define false FALSE
-
-
 #ifndef BYTE
 typedef unsigned char BYTE;
 #endif

@@ -62,8 +62,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ayam.c" />
-    <ClCompile Include="darray.c" />
+    <ClCompile Include="ayam.c">
+      <FileType>Text</FileType>
+    </ClCompile>
+    <ClCompile Include="darray.c">
+      <FileType>Text</FileType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ayam.h" />

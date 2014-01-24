@@ -1,4 +1,15 @@
 
+/*
+Project : Ayam Bertelor Emas
+Status  : Complete
+Author  : Daniel Sirait <dns@cpan.org>
+Copyright   : Copyright (c) 2013 - 2014, Daniel Sirait
+License : Proprietary
+Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
+ANY CONSEQUENCES OF YOUR USE/MISUSE OF THIS DOCUMENT,
+WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
+*/
+
 #ifndef _AYAM_H
 #define _AYAM_H
 
