@@ -21,7 +21,7 @@ extern "C" {
 typedef enum {
 	FLAT = 0,
 	BUY = 1,
-	SELL = 2
+	SELL = -1
 } FORECAST;
 
 FORECAST enter_market();

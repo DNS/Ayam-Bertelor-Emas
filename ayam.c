@@ -46,6 +46,7 @@ ARRAY_FLOAT *stddev;
 
 float sd_max;
 char buf[500];
+bool order_state;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID Reserved) {
 	switch (nReason) {
@@ -122,6 +123,8 @@ void ayam_init (DWORD mt_period) {
 DWORD ayam_start (double tick) {
 	DWORD size;
 
+	order_state = false;
+
 	size = arrayFloat_size(prices);
 	arrayFloat_add(prices, (float) tick);
 
@@ -149,7 +152,7 @@ void ayam_deinit () {
 FORECAST enter_market () {
 	DWORD size;
 	char signal[256];
-	FORECAST result;
+	FORECAST result = FLAT;
 
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
@@ -166,10 +169,12 @@ FORECAST enter_market () {
 		}
 	}
 	
-	if (DEBUG == true && (result == BUY || result == SELL)) {
+	if (DEBUG == true && (result == SELL || result == BUY) && order_state == false) {
 		sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", arrayFloat_last(prices), 
 			arrayFloat_last(sma), arrayFloat_last(stddev), signal);
 		MessageBoxA(NULL, buf, "enter_market()", MB_OK);
+	} else {
+		//MessageBoxA(NULL, "else zzz", "enter_market()", MB_OK);
 	}
 
 	return result;
