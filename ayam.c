@@ -36,7 +36,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #include "ayam.h"
 
 
-#define DEBUG true		// true: debug msg on, false: debug msg off
+#define DEBUG false		// true: debug msg on, false: debug msg off
 
 
 DWORD period;
@@ -44,9 +44,9 @@ ARRAY_FLOAT *prices;
 ARRAY_FLOAT *sma;
 ARRAY_FLOAT *stddev;
 
-float sd_max;
-char buf[500];
-bool order_state;
+float sd_max, profit_loss;
+char buf[100];
+ORDER order;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID Reserved) {
 	switch (nReason) {
@@ -106,12 +106,15 @@ void calc_stddev () {
 }
 
 void ayam_init (DWORD mt_period) {
-	period = mt_period;
+	period = mt_period;			// 100 tick
 	prices = arrayFloat_new();
 	sma = arrayFloat_new();
 	stddev = arrayFloat_new();
 
+	order.state = false;
+	order.type = FLAT;
 	sd_max = 0.0f;
+	profit_loss = 0.0f;
 
 	// check for errors
 	//if (prices != NULL && sma != NULL && stddev != NULL)
@@ -123,10 +126,8 @@ void ayam_init (DWORD mt_period) {
 DWORD ayam_start (double tick) {
 	DWORD size;
 
-	order_state = false;
-
 	size = arrayFloat_size(prices);
-	arrayFloat_add(prices, (float) tick);
+	arrayFloat_add(prices, tick);
 
 	calc_sma();
 	calc_stddev();
@@ -139,9 +140,9 @@ DWORD ayam_start (double tick) {
 
 
 void ayam_deinit () {
-	sprintf(buf, "sd_max: %f\n", sd_max);
-	MessageBoxA(NULL, buf, "sd_max", MB_OK);
-
+	sprintf(buf, "sd_max: %f\nprofit_loss: %f\n", sd_max, profit_loss);
+	MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
+	
 	arrayFloat_destroy(prices);
 	arrayFloat_destroy(stddev);
 	arrayFloat_destroy(sma);
@@ -149,9 +150,9 @@ void ayam_deinit () {
 
 
 
-FORECAST enter_market () {
+FORECAST enter_market() {
 	DWORD size;
-	char signal[256];
+	char signal[10];
 	FORECAST result = FLAT;
 
 	size = arrayFloat_size(prices);
@@ -162,19 +163,35 @@ FORECAST enter_market () {
 			if (arrayFloat_last(prices) > arrayFloat_last(sma)) {
 				strcpy(signal, "BUY");
 				result = BUY;
-			} else {
+			} else if (arrayFloat_last(prices) < arrayFloat_last(sma)) {
 				strcpy(signal, "SELL");
 				result = SELL;
+			} else {
+				strcpy(signal, "FLAT");
+				result = FLAT;
 			}
 		}
 	}
-	
-	if (DEBUG == true && (result == SELL || result == BUY) && order_state == false) {
-		sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", arrayFloat_last(prices), 
-			arrayFloat_last(sma), arrayFloat_last(stddev), signal);
-		MessageBoxA(NULL, buf, "enter_market()", MB_OK);
-	} else {
-		//MessageBoxA(NULL, "else zzz", "enter_market()", MB_OK);
+
+	if ((result == SELL) ^ (result == BUY) && order.state == false) {
+		sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", 
+			arrayFloat_last(prices), arrayFloat_last(sma), arrayFloat_last(stddev), signal);
+		if (DEBUG == true)
+			MessageBoxA(NULL, buf, "enter_market()", MB_OK);
+		order.state = true;
+		order.type = result;
+		order.open_order = arrayFloat_last(prices);
+	} else if (order.type != result && result != FLAT && order.state == true)  {
+		if (DEBUG == true)
+			MessageBoxA(NULL, "Close Opened Order", "enter_market()", MB_OK);
+		
+		if (order.type == BUY)
+			profit_loss += arrayFloat_last(prices) - order.open_order;
+		else if (order.type == SELL)
+			profit_loss += order.open_order - arrayFloat_last(prices);
+
+		order.state = false;
+		order.type = result;
 	}
 
 	return result;

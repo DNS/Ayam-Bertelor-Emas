@@ -21,8 +21,14 @@ extern "C" {
 typedef enum {
 	FLAT = 0,
 	BUY = 1,
-	SELL = -1
+	SELL = 2
 } FORECAST;
+
+typedef struct _ORDER {
+	FORECAST type;
+	bool state;
+	float open_order;
+} ORDER;
 
 FORECAST enter_market();
 void test_test_123 ();
