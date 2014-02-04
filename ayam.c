@@ -18,7 +18,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #pragma comment(lib, "Comctl32.lib")
 
 
-#undef UNICODE	// use 7-bit ASCII
+#undef UNICODE			// use 7-bit ASCII
 
 #include <windows.h>
 #include <commctrl.h>
@@ -36,7 +36,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #include "ayam.h"
 
 
-#define DEBUG false		// true: debug msg on, false: debug msg off
+#define DEBUG false		// true: debug msg on,   false: debug msg off
 
 
 DWORD period;
@@ -44,11 +44,13 @@ ARRAY_FLOAT *prices;
 ARRAY_FLOAT *sma;
 ARRAY_FLOAT *stddev;
 
-float sd_max, profit_loss;
-char buf[100];
+FLOAT sd_max, profit_loss;
+CHAR buf[100];
+
 ORDER order;
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID Reserved) {
+
+BOOL APIENTRY DllMain (HMODULE hModule, DWORD nReason, LPVOID Reserved) {
 	switch (nReason) {
 		case DLL_PROCESS_ATTACH:
 			DisableThreadLibraryCalls(hModule);		//  For optimization (for 1 thread only)
@@ -64,8 +66,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID Reserved) {
 
 void calc_sma () {
 	DWORD last_index, size, i;
-	float tick, mean, tmp;
-
+	FLOAT tick, mean, tmp;
+	
 	size = arrayFloat_size(prices);
 	last_index = size - 1;
 
@@ -112,7 +114,9 @@ void ayam_init (DWORD mt_period) {
 	stddev = arrayFloat_new();
 
 	order.state = false;
-	order.type = FLAT;
+	order.type = MARKET_OPEN_FLAT;
+	order.open_order = 0.0f;
+
 	sd_max = 0.0f;
 	profit_loss = 0.0f;
 
@@ -123,7 +127,7 @@ void ayam_init (DWORD mt_period) {
 }
 
 
-DWORD ayam_start (double tick) {
+DWORD ayam_start (double tick, ANALYZE type) {
 	DWORD size;
 
 	size = arrayFloat_size(prices);
@@ -135,12 +139,19 @@ DWORD ayam_start (double tick) {
 	if (sd_max < arrayFloat_last(stddev))
 		sd_max = arrayFloat_last(stddev);
 
-	return enter_market();
+	if (type == ANALYZE_OPEN)
+		return open_market();
+	else if (type == ANALYZE_CLOSE)
+		return close_market();
 }
 
 
 void ayam_deinit () {
-	sprintf(buf, "sd_max: %f\nprofit_loss: %f\n", sd_max, profit_loss);
+	int pl_pips;
+	
+	pl_pips = profit_loss * 1e+4;
+	sprintf(buf, "sd_max: %f\nprofit_loss: %f\nProfit/Loss (pips): %d\n", sd_max, profit_loss, pl_pips);
+
 	MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
 	
 	arrayFloat_destroy(prices);
@@ -150,10 +161,10 @@ void ayam_deinit () {
 
 
 
-FORECAST enter_market() {
+MARKET_OPEN open_market () {
 	DWORD size;
 	char signal[10];
-	FORECAST result = FLAT;
+	MARKET_OPEN result = MARKET_OPEN_FLAT;
 
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
@@ -162,37 +173,61 @@ FORECAST enter_market() {
 		if (arrayFloat_last(stddev) > 0.0002f) {
 			if (arrayFloat_last(prices) > arrayFloat_last(sma)) {
 				strcpy(signal, "BUY");
-				result = BUY;
+				result = MARKET_OPEN_BUY;
 			} else if (arrayFloat_last(prices) < arrayFloat_last(sma)) {
 				strcpy(signal, "SELL");
-				result = SELL;
-			} else {
-				strcpy(signal, "FLAT");
-				result = FLAT;
+				result = MARKET_OPEN_SELL;
 			}
+		} else {
+			strcpy(signal, "FLAT");
+			result = MARKET_OPEN_FLAT;
 		}
 	}
 
-	if ((result == SELL) ^ (result == BUY) && order.state == false) {
-		sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s", 
-			arrayFloat_last(prices), arrayFloat_last(sma), arrayFloat_last(stddev), signal);
-		if (DEBUG == true)
+	if ((result == MARKET_OPEN_SELL) ^ (result == MARKET_OPEN_BUY) && order.state == false) {
+		if (DEBUG == true) {
+			sprintf(buf, "Price: %f\nSMA: %f\nSTDDEV: %f\nsignal: %s",
+				arrayFloat_last(prices), arrayFloat_last(sma), arrayFloat_last(stddev), signal);
 			MessageBoxA(NULL, buf, "enter_market()", MB_OK);
+		}
+
 		order.state = true;
 		order.type = result;
 		order.open_order = arrayFloat_last(prices);
-	} else if (order.type != result && result != FLAT && order.state == true)  {
-		if (DEBUG == true)
-			MessageBoxA(NULL, "Close Opened Order", "enter_market()", MB_OK);
-		
-		if (order.type == BUY)
-			profit_loss += arrayFloat_last(prices) - order.open_order;
-		else if (order.type == SELL)
-			profit_loss += order.open_order - arrayFloat_last(prices);
 
-		order.state = false;
-		order.type = result;
 	}
+
+
+	return result;
+}
+
+MARKET_CLOSE close_market () {
+	MARKET_CLOSE result = MARKET_CLOSE_NO;
+	DWORD size;
+	
+	size = arrayFloat_size(prices);
+
+	if (size > period && order.state == true) {
+		if (arrayFloat_last(stddev) < 0.0002f) {
+			if (order.type == MARKET_OPEN_SELL) {
+				profit_loss += arrayFloat_last(prices) - order.open_order;
+				result = MARKET_CLOSE_SELL_OK;
+				//MessageBoxA(NULL, "MARKET_CLOSE_SELL_OK", "close_market()", MB_OK);
+			} else if (order.type == MARKET_OPEN_BUY) {
+				profit_loss += arrayFloat_last(prices) - order.open_order;
+				result = MARKET_CLOSE_BUY_OK;
+				//MessageBoxA(NULL, "MARKET_CLOSE_BUY_OK", "close_market()", MB_OK);
+			}
+
+
+			order.state = false;
+			order.type = MARKET_OPEN_FLAT;
+			order.open_order = 0.0f;
+		}
+	}
+
+
+	
 
 	return result;
 }

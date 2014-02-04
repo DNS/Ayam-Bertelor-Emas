@@ -19,24 +19,37 @@ extern "C" {
 #endif
 
 typedef enum {
-	FLAT = 0,
-	BUY = 1,
-	SELL = 2
-} FORECAST;
+	MARKET_OPEN_FLAT = 0,
+	MARKET_OPEN_BUY = 1,
+	MARKET_OPEN_SELL = 2,
+} MARKET_OPEN;
+
+
+typedef enum {
+	MARKET_CLOSE_NO = 3,
+	MARKET_CLOSE_BUY_OK = 4,
+	MARKET_CLOSE_SELL_OK = 5
+} MARKET_CLOSE;
 
 typedef struct _ORDER {
-	FORECAST type;
+	MARKET_OPEN type;
 	bool state;
 	float open_order;
 } ORDER;
 
-FORECAST enter_market();
+typedef enum {
+	ANALYZE_OPEN = 1001,
+	ANALYZE_CLOSE = 1002
+} ANALYZE;
+
+MARKET_OPEN open_market ();
+MARKET_CLOSE close_market ();
 void test_test_123 ();
 void calc_sma ();
 void calc_stddev ();
 
-__declspec(dllexport) void __cdecl ayam_init (DWORD _period);
-__declspec(dllexport) DWORD __cdecl ayam_start (double tick);
+__declspec(dllexport) void __cdecl ayam_init (DWORD);
+__declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
 __declspec(dllexport) void __cdecl ayam_deinit ();
 
 
@@ -45,5 +58,6 @@ __declspec(dllexport) void __cdecl ayam_deinit ();
 #endif
 
 
+/* _AYAM_H */
 #endif
 
