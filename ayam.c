@@ -202,9 +202,10 @@ MARKET_OPEN open_market () {
 }
 
 MARKET_CLOSE close_market () {
-	MARKET_CLOSE result = MARKET_CLOSE_NO;
+	MARKET_CLOSE result;
 	DWORD size;
 	
+	result = MARKET_CLOSE_NO;
 	size = arrayFloat_size(prices);
 
 	if (size > period && order.state == true) {
@@ -219,11 +220,11 @@ MARKET_CLOSE close_market () {
 				//MessageBoxA(NULL, "MARKET_CLOSE_BUY_OK", "close_market()", MB_OK);
 			}
 
-
 			order.state = false;
 			order.type = MARKET_OPEN_FLAT;
 			order.open_order = 0.0f;
 		}
+
 	}
 
 
