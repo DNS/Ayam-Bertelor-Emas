@@ -51,7 +51,7 @@ void calc_stddev ();
 __declspec(dllexport) void __cdecl ayam_init (DWORD);
 __declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
 __declspec(dllexport) void __cdecl ayam_deinit ();
-
+__declspec(dllexport) void ayam_mt4stoploss();
 
 #ifdef __cplusplus
 }
