@@ -47,7 +47,7 @@ ARRAY_FLOAT *sma;
 ARRAY_FLOAT *stddev;
 
 FLOAT sd_max, profit_loss;
-CHAR buf[100];
+CHAR buf[1000];
 BOOL detect_profit;
 FLOAT spread;
 
@@ -115,7 +115,7 @@ void calc_stddev () {
 
 
 void ayam_init (DWORD mt_period) {
-	period = mt_period;			// 100 tick
+	period = mt_period;				// 100 tick
 	prices = arrayFloat_new();
 	sma = arrayFloat_new();
 	stddev = arrayFloat_new();
@@ -128,6 +128,8 @@ void ayam_init (DWORD mt_period) {
 	profit_loss = 0.0f;
 
 	spread = 0.00012f;
+
+	detect_profit = false;
 
 	// check for errors
 	//if (prices != NULL && sma != NULL && stddev != NULL)
@@ -144,6 +146,7 @@ DWORD ayam_start (double tick, ANALYZE type) {
 
 	calc_sma();
 	calc_stddev();
+
 
 	if (sd_max < arrayFloat_last(stddev))
 		sd_max = arrayFloat_last(stddev);
@@ -162,7 +165,8 @@ void ayam_deinit () {
 	pl_pips = profit_loss * 1e+4;
 	sprintf(buf, "sd_max: %f\nprofit_loss: %f\nProfit/Loss (pips): %d\n", sd_max, profit_loss, pl_pips);
 
-	MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
+	if (DEBUG == true)
+		MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
 	
 	arrayFloat_destroy(prices);
 	arrayFloat_destroy(stddev);
@@ -177,6 +181,7 @@ MARKET_OPEN open_market () {
 
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
+	detect_profit = false;
 
 	if (size > period) {
 		if (arrayFloat_last(stddev) > 0.0002f) {
@@ -218,19 +223,39 @@ MARKET_CLOSE close_market () {
 
 	result = MARKET_CLOSE_NO;
 	size = arrayFloat_size(prices);
-	
-	// Detect Profit
-	if (order.type == MARKET_OPEN_SELL && ((order.open_order - arrayFloat_last(prices)) > spread)) 
-		detect_profit == true;
-	else if (order.type == MARKET_OPEN_BUY && ((arrayFloat_last(prices) - order.open_order) > spread))
-		detect_profit == true;
 
-	// Close Order
-	if (size > period && order.state == true && detect_profit == true) {
-		MessageBoxA(NULL, "detect_profit", "!!!!!", MB_OK);
+	// Detect Profit
+	if (order.type == MARKET_OPEN_SELL && (order.open_order - arrayFloat_last(prices) - spread) > 0)
+		detect_profit = true;
+	else if (order.type == MARKET_OPEN_BUY && (arrayFloat_last(prices) - order.open_order - spread) > 0)
+		detect_profit = true;
+
+	
+	// avoid losses after profit detected
+	if (order.type == MARKET_OPEN_SELL && arrayFloat_last(prices) > order.open_order && detect_profit == true) {
+		order.state = false;
+		order.type = MARKET_OPEN_FLAT;
+		order.open_order = 0.0f;
+
+		result = MARKET_CLOSE_SELL_OK;
+		detect_profit = false;
+		return result;
+	} else if (order.type == MARKET_OPEN_BUY && arrayFloat_last(prices) < order.open_order && detect_profit == true) {
+		order.state = false;
+		order.type = MARKET_OPEN_FLAT;
+		order.open_order = 0.0f;
+
+		result = MARKET_CLOSE_BUY_OK;
+		detect_profit = false;
+		return result;
+	}
+
+
+	// Take Profit if stddev < C
+	if (size > period && order.state == true) {
 		if (order.type == MARKET_OPEN_SELL) {
-			dif = order.open_order - arrayFloat_last(prices) - spread;
-			if (dif >= 0.0005f) {
+			//dif = order.open_order - arrayFloat_last(prices) - spread;
+			if (arrayFloat_last(stddev) < 0.0002f) {
 
 				profit_loss += dif;
 
@@ -239,20 +264,25 @@ MARKET_CLOSE close_market () {
 				order.open_order = 0.0f;
 
 				result = MARKET_CLOSE_SELL_OK;
+				detect_profit = false;
 			}
 		} else if (order.type == MARKET_OPEN_BUY) {
-			profit_loss += arrayFloat_last(prices) - order.open_order;
+			if (arrayFloat_last(stddev) < 0.0002f) {
+				profit_loss += arrayFloat_last(prices) - order.open_order;
 
-			order.state = false;
-			order.type = MARKET_OPEN_FLAT;
-			order.open_order = 0.0f;
+				order.state = false;
+				order.type = MARKET_OPEN_FLAT;
+				order.open_order = 0.0f;
 
-			result = MARKET_CLOSE_BUY_OK;
+				result = MARKET_CLOSE_BUY_OK;
+				detect_profit = false;
+			}
 		}
 	}
-
-
 	
+	
+
+
 
 	return result;
 }
@@ -261,13 +291,13 @@ void ayam_mt4stoploss () {
 	order.state = false;
 	order.type = MARKET_OPEN_FLAT;
 	order.open_order = 0.0f;
+	detect_profit = false;
 	//MessageBoxA(NULL, "ayam_mt4stoploss", "ayam_mt4stoploss", MB_OK);
 }
 
 void COM_test () {
 	IUnknown i;
 	IUnknownVtbl j;
-	
 }
 
 //MessageBoxA(NULL, "asd", "enter_market", MB_OK);

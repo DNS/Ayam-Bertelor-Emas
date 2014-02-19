@@ -17,19 +17,31 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #ifdef __cplusplus
 extern "C" {
 #endif
+//
+//typedef enum {
+//	MARKET_OPEN_FLAT = 0,
+//	MARKET_OPEN_BUY = 1,
+//	MARKET_OPEN_SELL = 2,
+//} MARKET_OPEN;
+//
+//
+//typedef enum {
+//	MARKET_CLOSE_NO = 3,
+//	MARKET_CLOSE_BUY_OK = 4,
+//	MARKET_CLOSE_SELL_OK = 5
+//} MARKET_CLOSE;
+//
 
-typedef enum {
-	MARKET_OPEN_FLAT = 0,
-	MARKET_OPEN_BUY = 1,
-	MARKET_OPEN_SELL = 2,
-} MARKET_OPEN;
+#define MARKET_OPEN DWORD
+#define MARKET_OPEN_FLAT 0
+#define MARKET_OPEN_BUY 1
+#define MARKET_OPEN_SELL 2
 
+#define MARKET_CLOSE DWORD
+#define MARKET_CLOSE_NO 3
+#define MARKET_CLOSE_BUY_OK 4
+#define MARKET_CLOSE_SELL_OK 5
 
-typedef enum {
-	MARKET_CLOSE_NO = 3,
-	MARKET_CLOSE_BUY_OK = 4,
-	MARKET_CLOSE_SELL_OK = 5
-} MARKET_CLOSE;
 
 typedef struct _ORDER {
 	MARKET_OPEN type;
