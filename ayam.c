@@ -129,15 +129,16 @@ void ayam_init (DWORD mt_period) {
 	sd_max = 0.0f;
 	profit_loss = 0.0f;
 
-	spread = 0.00012f;
+	spread = 0.00012f;		// 1.2 pips
 
 	detect_profit = false;
 
 	// check for errors
 	//if (prices != NULL && sma != NULL && stddev != NULL)
 		//MessageBoxA(NULL, "Initialization Complete !", "DEBUG", MB_OK);
-
+	
 }
+
 
 
 DWORD ayam_start (double tick, ANALYZE type) {
@@ -164,7 +165,7 @@ DWORD ayam_start (double tick, ANALYZE type) {
 void ayam_deinit () {
 	int pl_pips;
 	
-	pl_pips = profit_loss * 1e+4;
+	pl_pips = profit_loss * 1e+4f;
 	sprintf(buf, "sd_max: %f\nprofit_loss: %f\nProfit/Loss (pips): %d\n", sd_max, profit_loss, pl_pips);
 
 	if (DEBUG == true)
@@ -184,8 +185,8 @@ MARKET_OPEN open_market () {
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
 	detect_profit = false;
-	profit_loss = 0.0f;
-	max_profit = -1000.0f;
+	profit_loss = 0.0f - spread;
+	max_profit = profit_loss;
 
 
 	if (size > period) {
@@ -267,7 +268,24 @@ MARKET_CLOSE close_market () {
 
 	// Dynamic Profit / improved trailing stop
 	if (size > period && detect_profit == true && order.state == true) {
-		max_profit
+		sprintf(buf, "max_profit: %f\nprofit_loss: %f", max_profit, profit_loss);
+		
+		// BUG: not working
+		if (max_profit >= 0.0005f && profit_loss <= 0.0003f) {
+			//MessageBoxA(NULL, buf, "max_profit", MB_OK);
+			order.state = false;
+			order.type = MARKET_OPEN_FLAT;
+			order.open_order = 0.0f;
+
+			detect_profit = false;
+
+			if (order.type == MARKET_OPEN_SELL)
+				result = MARKET_CLOSE_SELL_OK;
+			else if (order.type == MARKET_OPEN_BUY)
+				result = MARKET_CLOSE_BUY_OK;
+
+			//return result;
+		}
 	}
 
 
@@ -300,10 +318,6 @@ MARKET_CLOSE close_market () {
 		}
 	}
 	
-	
-
-
-
 	return result;
 }
 
@@ -312,7 +326,10 @@ void ayam_mt4stoploss () {
 	order.type = MARKET_OPEN_FLAT;
 	order.open_order = 0.0f;
 	detect_profit = false;
-	//MessageBoxA(NULL, "ayam_mt4stoploss", "ayam_mt4stoploss", MB_OK);
+}
+
+FLOAT pips2point (FLOAT val_pips) {
+	return val_pips / 1e-4f;
 }
 
 void COM_test () {

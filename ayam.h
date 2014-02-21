@@ -59,6 +59,7 @@ MARKET_CLOSE close_market ();
 void test_test_123 ();
 void calc_sma ();
 void calc_stddev ();
+FLOAT pips2point(FLOAT);
 
 __declspec(dllexport) void __cdecl ayam_init (DWORD);
 __declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
