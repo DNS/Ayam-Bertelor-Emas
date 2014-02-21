@@ -46,10 +46,12 @@ ARRAY_FLOAT *prices;
 ARRAY_FLOAT *sma;
 ARRAY_FLOAT *stddev;
 
-FLOAT sd_max, profit_loss;
+FLOAT sd_max;
+FLOAT profit_loss;
 CHAR buf[1000];
 BOOL detect_profit;
 FLOAT spread;
+FLOAT max_profit;
 
 ORDER order;
 
@@ -182,6 +184,9 @@ MARKET_OPEN open_market () {
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
 	detect_profit = false;
+	profit_loss = 0.0f;
+	max_profit = -1000.0f;
+
 
 	if (size > period) {
 		if (arrayFloat_last(stddev) > 0.0002f) {
@@ -224,13 +229,23 @@ MARKET_CLOSE close_market () {
 	result = MARKET_CLOSE_NO;
 	size = arrayFloat_size(prices);
 
-	// Detect Profit
-	if (order.type == MARKET_OPEN_SELL && (order.open_order - arrayFloat_last(prices) - spread) > 0)
-		detect_profit = true;
-	else if (order.type == MARKET_OPEN_BUY && (arrayFloat_last(prices) - order.open_order - spread) > 0)
-		detect_profit = true;
+	// calculate profit
+	if (order.type == MARKET_OPEN_SELL) 
+		profit_loss = order.open_order - arrayFloat_last(prices) - spread;
+	else if (order.type == MARKET_OPEN_BUY)
+		profit_loss = arrayFloat_last(prices) - order.open_order - spread;
 
+	// Detect Profit
+	if (order.type == MARKET_OPEN_SELL && profit_loss > 0.0f)
+		detect_profit = true;
+	else if (order.type == MARKET_OPEN_BUY && profit_loss > 0.0f)
+		detect_profit = true;
 	
+	
+	
+	if (max_profit < profit_loss)
+		max_profit = profit_loss;
+
 	// avoid losses after profit detected
 	if (order.type == MARKET_OPEN_SELL && arrayFloat_last(prices) > order.open_order && detect_profit == true) {
 		order.state = false;
@@ -248,6 +263,11 @@ MARKET_CLOSE close_market () {
 		result = MARKET_CLOSE_BUY_OK;
 		detect_profit = false;
 		return result;
+	}
+
+	// Dynamic Profit / improved trailing stop
+	if (size > period && detect_profit == true && order.state == true) {
+		max_profit
 	}
 
 
