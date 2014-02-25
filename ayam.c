@@ -52,6 +52,7 @@ CHAR buf[1000];
 BOOL detect_profit;
 FLOAT spread;
 FLOAT max_profit;
+UINT32 counter;
 
 ORDER order;
 
@@ -133,6 +134,8 @@ void ayam_init (DWORD mt_period) {
 
 	detect_profit = false;
 
+	counter = 0;
+
 	// check for errors
 	//if (prices != NULL && sma != NULL && stddev != NULL)
 		//MessageBoxA(NULL, "Initialization Complete !", "DEBUG", MB_OK);
@@ -170,6 +173,9 @@ void ayam_deinit () {
 
 	if (DEBUG == true)
 		MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
+
+	sprintf(buf, "counter: %d\n", counter);
+	MessageBoxA(NULL, buf, "bounce back: ", MB_OK);
 	
 	arrayFloat_destroy(prices);
 	arrayFloat_destroy(stddev);
@@ -177,10 +183,10 @@ void ayam_deinit () {
 }
 
 
-MARKET_OPEN open_market () {
+MARKET_ACTION open_market () {
 	DWORD size;
 	char signal[10];
-	MARKET_OPEN result = MARKET_OPEN_FLAT;
+	MARKET_ACTION result = MARKET_OPEN_FLAT;
 
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
@@ -222,8 +228,8 @@ MARKET_OPEN open_market () {
 }
 
 
-MARKET_CLOSE close_market () {
-	MARKET_CLOSE result;
+MARKET_ACTION close_market () {
+	MARKET_ACTION result;
 	DWORD size;
 	float dif = 0.0f;
 
@@ -248,43 +254,29 @@ MARKET_CLOSE close_market () {
 		max_profit = profit_loss;
 
 	// avoid losses after profit detected
-	if (order.type == MARKET_OPEN_SELL && arrayFloat_last(prices) > order.open_order && detect_profit == true) {
-		order.state = false;
-		order.type = MARKET_OPEN_FLAT;
-		order.open_order = 0.0f;
-
+	if (order.type == MARKET_OPEN_SELL && profit_loss <= .0f && detect_profit == true) {
+		reset_order();
 		result = MARKET_CLOSE_SELL_OK;
-		detect_profit = false;
 		return result;
-	} else if (order.type == MARKET_OPEN_BUY && arrayFloat_last(prices) < order.open_order && detect_profit == true) {
-		order.state = false;
-		order.type = MARKET_OPEN_FLAT;
-		order.open_order = 0.0f;
-
+	} else if (order.type == MARKET_OPEN_BUY && profit_loss <= .0f && detect_profit == true) {
+		reset_order();
 		result = MARKET_CLOSE_BUY_OK;
-		detect_profit = false;
 		return result;
 	}
 
 	// Dynamic Profit / improved trailing stop
 	if (size > period && detect_profit == true && order.state == true) {
-		sprintf(buf, "max_profit: %f\nprofit_loss: %f", max_profit, profit_loss);
-		
-		// BUG: not working
 		if (max_profit >= 0.0005f && profit_loss <= 0.0003f) {
-			//MessageBoxA(NULL, buf, "max_profit", MB_OK);
-			order.state = false;
-			order.type = MARKET_OPEN_FLAT;
-			order.open_order = 0.0f;
-
-			detect_profit = false;
+			counter++;
 
 			if (order.type == MARKET_OPEN_SELL)
 				result = MARKET_CLOSE_SELL_OK;
 			else if (order.type == MARKET_OPEN_BUY)
 				result = MARKET_CLOSE_BUY_OK;
 
-			//return result;
+
+			reset_order();
+			return result;
 		}
 	}
 
@@ -292,28 +284,14 @@ MARKET_CLOSE close_market () {
 	// Take Profit if stddev < C
 	if (size > period && order.state == true) {
 		if (order.type == MARKET_OPEN_SELL) {
-			//dif = order.open_order - arrayFloat_last(prices) - spread;
 			if (arrayFloat_last(stddev) < 0.0002f) {
-
-				profit_loss += dif;
-
-				order.state = false;
-				order.type = MARKET_OPEN_FLAT;
-				order.open_order = 0.0f;
-
+				reset_order();
 				result = MARKET_CLOSE_SELL_OK;
-				detect_profit = false;
 			}
 		} else if (order.type == MARKET_OPEN_BUY) {
 			if (arrayFloat_last(stddev) < 0.0002f) {
-				profit_loss += arrayFloat_last(prices) - order.open_order;
-
-				order.state = false;
-				order.type = MARKET_OPEN_FLAT;
-				order.open_order = 0.0f;
-
+				reset_order();
 				result = MARKET_CLOSE_BUY_OK;
-				detect_profit = false;
 			}
 		}
 	}
@@ -321,11 +299,16 @@ MARKET_CLOSE close_market () {
 	return result;
 }
 
-void ayam_mt4stoploss () {
+void reset_order () {
 	order.state = false;
 	order.type = MARKET_OPEN_FLAT;
 	order.open_order = 0.0f;
+
 	detect_profit = false;
+}
+
+void ayam_mt4stoploss () {
+	reset_order();
 }
 
 FLOAT pips2point (FLOAT val_pips) {
