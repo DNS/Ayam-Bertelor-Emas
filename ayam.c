@@ -12,7 +12,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
-	name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+	name='Microsoft.Windows.Common-Controls' version='6...0' \
 	processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #pragma comment(lib, "Comctl32.lib")
@@ -80,7 +80,7 @@ void calc_sma () {
 	last_index = size - 1;
 
 	if (size > period) {
-		tmp = 0.0f;
+		tmp = .0f;
 		for (i=last_index; i>(last_index-period); i--) {
 			tmp += arrayFloat_get(prices, i);
 		}
@@ -103,12 +103,12 @@ void calc_stddev () {
 	last_index = size - 1;
 
 	if (size > period) {
-		tmp = 0.0f;
+		tmp = .0f;
 		mean = arrayFloat_get(sma, last_index);
 		for (i=last_index; i>(last_index-period); i--) {
-			tmp += pow( (arrayFloat_get(prices,i) - mean), 2);
+			tmp += (float) pow( (arrayFloat_get(prices,i) - mean), 2);
 		}
-		sd = pow(tmp / period, 5e-1);		/* sqrt(x), x^1/2, x^0.5f, x^5e-1 */
+		sd = (float) pow(tmp / period, 5e-1);		/* sqrt(x), x^1/2, x^0.5f, x^5e-1 */
 		arrayFloat_add(stddev, sd);
 
 	} else {
@@ -125,12 +125,12 @@ void ayam_init (DWORD mt_period) {
 
 	order.state = false;
 	order.type = MARKET_OPEN_FLAT;
-	order.open_order = 0.0f;
+	order.open_order = .0f;
 
-	sd_max = 0.0f;
-	profit_loss = 0.0f;
+	sd_max = .0f;
+	profit_loss = .0f;
 
-	spread = 0.00012f;		// 1.2 pips
+	spread = .00012f;		// 1.2 pips
 
 	detect_profit = false;
 
@@ -148,7 +148,7 @@ DWORD ayam_start (double tick, ANALYZE type) {
 	DWORD size;
 
 	size = arrayFloat_size(prices);
-	arrayFloat_add(prices, tick);
+	arrayFloat_add(prices, (float) tick);
 
 	calc_sma();
 	calc_stddev();
@@ -168,7 +168,7 @@ DWORD ayam_start (double tick, ANALYZE type) {
 void ayam_deinit () {
 	int pl_pips;
 	
-	pl_pips = profit_loss * 1e+4f;
+	pl_pips = (int) (profit_loss * 1e+4f);
 	sprintf(buf, "sd_max: %f\nprofit_loss: %f\nProfit/Loss (pips): %d\n", sd_max, profit_loss, pl_pips);
 
 	if (DEBUG == true)
@@ -191,12 +191,12 @@ MARKET_ACTION open_market () {
 	size = arrayFloat_size(prices);
 	strcpy(signal, "");
 	detect_profit = false;
-	profit_loss = 0.0f - spread;
+	profit_loss = .0f - spread;
 	max_profit = profit_loss;
 
 
 	if (size > period) {
-		if (arrayFloat_last(stddev) > 0.0002f) {
+		if (arrayFloat_last(stddev) > .0002f) {
 			if (arrayFloat_last(prices) > arrayFloat_last(sma)) {
 				strcpy(signal, "BUY");
 				result = MARKET_OPEN_BUY;
@@ -231,7 +231,7 @@ MARKET_ACTION open_market () {
 MARKET_ACTION close_market () {
 	MARKET_ACTION result;
 	DWORD size;
-	float dif = 0.0f;
+	float dif = .0f;
 
 	result = MARKET_CLOSE_NO;
 	size = arrayFloat_size(prices);
@@ -243,9 +243,9 @@ MARKET_ACTION close_market () {
 		profit_loss = arrayFloat_last(prices) - order.open_order - spread;
 
 	// Detect Profit
-	if (order.type == MARKET_OPEN_SELL && profit_loss > 0.0f)
+	if (order.type == MARKET_OPEN_SELL && profit_loss > .0f)
 		detect_profit = true;
-	else if (order.type == MARKET_OPEN_BUY && profit_loss > 0.0f)
+	else if (order.type == MARKET_OPEN_BUY && profit_loss > .0f)
 		detect_profit = true;
 	
 	
@@ -266,7 +266,26 @@ MARKET_ACTION close_market () {
 
 	// Dynamic Profit / improved trailing stop
 	if (size > period && detect_profit == true && order.state == true) {
-		if (max_profit >= 0.0005f && profit_loss <= 0.0003f) {
+		// TODO:
+		FLOAT tp_checkpoint[13] = {3.f, 5.f, 10.f, 15.f, 20.f, 30.f, 40.f, 50.f, 60.f, 70.f, 80.f, 90.f, 100.f};
+		FLOAT tp_ratio[13] = {.3333f, .6f, .5f, .6f, .65f, .7333f, .775f, .8f, .8f, .8f, .8f, .8f, .8f};
+		int i;
+
+		for (i=13; i>=0; --i) {
+			if (max_profit >= tp_checkpoint[i] && profit_loss <= (tp_checkpoint[i] * tp_ratio[i])) {
+				counter++;
+
+				if (order.type == MARKET_OPEN_SELL)
+					result = MARKET_CLOSE_SELL_OK;
+				else if (order.type == MARKET_OPEN_BUY)
+					result = MARKET_CLOSE_BUY_OK;
+
+				reset_order();
+				return result;
+			}
+		}
+
+		/*if (max_profit >= .0005f && profit_loss <= .0003f) {
 			counter++;
 
 			if (order.type == MARKET_OPEN_SELL)
@@ -274,22 +293,21 @@ MARKET_ACTION close_market () {
 			else if (order.type == MARKET_OPEN_BUY)
 				result = MARKET_CLOSE_BUY_OK;
 
-
 			reset_order();
 			return result;
-		}
+		}*/
 	}
 
 
 	// Take Profit if stddev < C
 	if (size > period && order.state == true) {
 		if (order.type == MARKET_OPEN_SELL) {
-			if (arrayFloat_last(stddev) < 0.0002f) {
+			if (arrayFloat_last(stddev) < .0002f) {
 				reset_order();
 				result = MARKET_CLOSE_SELL_OK;
 			}
 		} else if (order.type == MARKET_OPEN_BUY) {
-			if (arrayFloat_last(stddev) < 0.0002f) {
+			if (arrayFloat_last(stddev) < .0002f) {
 				reset_order();
 				result = MARKET_CLOSE_BUY_OK;
 			}
@@ -302,7 +320,7 @@ MARKET_ACTION close_market () {
 void reset_order () {
 	order.state = false;
 	order.type = MARKET_OPEN_FLAT;
-	order.open_order = 0.0f;
+	order.open_order = .0f;
 
 	detect_profit = false;
 }
