@@ -174,8 +174,8 @@ void ayam_deinit () {
 	if (DEBUG == true)
 		MessageBoxA(NULL, buf, "ayam_deinit()", MB_OK);
 
-	sprintf(buf, "counter: %d\n", counter);
-	MessageBoxA(NULL, buf, "bounce back: ", MB_OK);
+	//sprintf(buf, "counter: %d\n", counter);
+	//MessageBoxA(NULL, buf, "bounce back: ", MB_OK);
 	
 	arrayFloat_destroy(prices);
 	arrayFloat_destroy(stddev);
@@ -271,8 +271,8 @@ MARKET_ACTION close_market () {
 		FLOAT tp_ratio[13] = {.3333f, .6f, .5f, .6f, .65f, .7333f, .775f, .8f, .8f, .8f, .8f, .8f, .8f};
 		int i;
 
-		for (i=13; i>=0; --i) {
-			if (max_profit >= tp_checkpoint[i] && profit_loss <= (tp_checkpoint[i] * tp_ratio[i])) {
+		for (i=12; i>=0; i--) {
+			if (max_profit >= tp_checkpoint[i] && profit_loss <= (max_profit * tp_ratio[i])) {
 				counter++;
 
 				if (order.type == MARKET_OPEN_SELL)
@@ -300,7 +300,7 @@ MARKET_ACTION close_market () {
 
 
 	// Take Profit if stddev < C
-	if (size > period && order.state == true) {
+	/*if (size > period && order.state == true) {
 		if (order.type == MARKET_OPEN_SELL) {
 			if (arrayFloat_last(stddev) < .0002f) {
 				reset_order();
@@ -312,7 +312,7 @@ MARKET_ACTION close_market () {
 				result = MARKET_CLOSE_BUY_OK;
 			}
 		}
-	}
+	}*/
 	
 	return result;
 }
