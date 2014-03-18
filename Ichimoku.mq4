@@ -8,7 +8,12 @@
 
 #define MAGICNUMBER  06112013
 
-int SL = 200;
+
+#import "Ayam Bertelor Emas.dll"
+void MsgBox (string, string);
+
+
+int SL = 180;
 int TP = 4000;	// 400 pips
 int TrailingStop = 20;
 double lots = 0.01;
@@ -36,6 +41,7 @@ bool detect_profit = false;
 // if price up/below kumo
 int UP_KUMO = 1;
 int DOWN_KUMO = 2;
+int FLAT_KUMO = 3;
 
 int kumo_state;
 
@@ -65,8 +71,9 @@ int deinit () {
 
 
 int start () {
-	
 	// hit SL/TP
+	
+	
 	if (is_trade == true && OrdersTotal() == 0) {
 		is_trade = false;
 		ticket = -1;
@@ -100,17 +107,28 @@ int start () {
 		return;
 	}
 	
-	// BUG
+	
+	// BUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (kumo_state != FLAT_KUMO && ((Close[1] < senkou_span_a[0] && Close[1] > senkou_span_b[0]) || 
+		(Close[1] > senkou_span_a[0] && Close[1] < senkou_span_b[0])) ) {
+		kumo_state = FLAT_KUMO;
+		wait_trade = true;
+	}	
+		
 	if (wait_trade) {
-		if (kumo_state == DOWN_KUMO && Close[1] > senkou_span_a[0] && Close[1] > senkou_span_b[0]) {
-			wait_trade = false;
+		if (kumo_state != UP_KUMO && Close[1] > senkou_span_a[0] && Close[1] > senkou_span_b[0]) {
 			kumo_state = UP_KUMO;
-		} else if (kumo_state == UP_KUMO && Close[1] < senkou_span_a[0] && Close[1] < senkou_span_b[0]) {
 			wait_trade = false;
+			//MsgBox("WAIT_FALSE DOWN", "caption");
+		} else if (kumo_state != DOWN_KUMO && Close[1] < senkou_span_a[0] && Close[1] < senkou_span_b[0]) {
 			kumo_state = DOWN_KUMO;
+			wait_trade = true;
+			//MsgBox("WAIT_FALSE UP", "caption");
 		} else {
-			return;
+			//return;
 		}
+	} else {
+		
 	}
 	
 	
@@ -120,12 +138,14 @@ int start () {
 		// open trade
 		// entry: BUY
 		if (Close[1] > kijun_sen[0] && Close[1] > senkou_span_a[0] && Close[1] > senkou_span_b[0] &&
-			chinkou_span[25] > Close[25] &&
-			Low[1] > senkou_span_a[0] && 
-			Low[1] > senkou_span_b[0] 
+			chinkou_span[25] > Close[26] &&
+			Open[1] > senkou_span_a[0] && 
+			Open[1] > senkou_span_b[0] 
+			//&& (macd_main - macd_signal) > 0.0010
+			&& wait_trade == false
 			//tenkan_sen[0] > tenkan_sen[1] &&
 			//tenkan_sen[0] > senkou_span_a[0] &&
-			//tenkan_sen[0] > senkou_span_b[0] 
+			//tenkan_sen[0] > senkou_span_b[0]
 			//macd_main > macd_signal
 			//&& macd_signal < 0
 			) {
@@ -134,23 +154,47 @@ int start () {
 			//ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, stop_loss, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			if (ticket != -1) is_trade = true;
+			/*
+			if (kumo_state == DOWN_KUMO)
+				MsgBox("DOWN_KUMO", "caption");
+			else if (kumo_state == UP_KUMO)
+				MsgBox("UP_KUMO", "caption");
+			*/
+				
+		// entry: SELL
+		} else if (wait_trade == false)  {
 			
+			//is_trade = true;
 		}
 	} else {
 		// close trade, TP, SL
 		
 		OrderSelect(ticket, SELECT_BY_TICKET);
 		
+		
 		// exit: BUY
 		// TP
-		if (macd_main < macd_signal || chinkou_span[25] <= Close[25]) {
-			OrderClose(ticket, OrderLots(), Bid, 0, White);
-			ticket = -1;
-			wait_trade = true;
-			is_trade = false;
+		if (OrderType() == OP_BUY) {
+			if (macd_main < macd_signal || chinkou_span[25] < Low[25]
+			//Close[1] < kijun_sen[0]
+			) {
+				OrderClose(ticket, OrderLots(), Bid, 0, White);
+				ticket = -1;
+				wait_trade = true;
+				is_trade = false;
+				//MsgBox("CLOSE: WAIT TRUE", "caption");
+			}
+			
+		// exit: SELL
+		} else {
+			//wait_trade = true;
+			//is_trade = false;
+		
 		}
 		
+		
 		// SL
+		/*
 		double stop_loss;
 		if (senkou_span_a[0] < senkou_span_b[0]) {
 			stop_loss = senkou_span_a[0];
@@ -160,10 +204,11 @@ int start () {
 		if (Close[0] <= (stop_loss + 0.00012) ) {
 			OrderClose(ticket, OrderLots(), Bid, 0, White);
 			ticket = -1;
-			wait_trade = true;
+			//wait_trade = true;
 			is_trade = false;
+			//MsgBox("KUMO HIT", "caption");
 		}
-		
+		*/
 		// Detect Profit
 		//if () 
 	}

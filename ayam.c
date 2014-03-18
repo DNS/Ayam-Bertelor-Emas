@@ -333,6 +333,13 @@ FLOAT pips2point (FLOAT val_pips) {
 	return val_pips / 1e-4f;
 }
 
+
+
+void MsgBox (const char *text, const char *caption) {
+	MessageBoxA(NULL, text, caption, MB_OK);
+}
+
+
 void COM_test () {
 	IUnknown i;
 	IUnknownVtbl j;
