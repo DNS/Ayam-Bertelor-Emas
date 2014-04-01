@@ -3,6 +3,7 @@
 //|                                   Copyright 2014, Daniel Sirait  |
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
+
 #property copyright "Copyright 2014, Daniel Sirait"
 #property link      "http://www.siraitx.com/"
 
