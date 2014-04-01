@@ -1,9 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                                     Ichimoku.mq4 |
-//|                                Copyright 2014, Daniel Hasudungan |
+//|                                   Copyright 2014, Daniel Sirait  |
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2014, Daniel Hasudungan"
+#property copyright "Copyright 2014, Daniel Sirait"
 #property link      "http://www.siraitx.com/"
 
 #define MAGICNUMBER  06112013
@@ -13,8 +13,8 @@
 void MsgBox (string, string);
 
 
-int SL = 130;
-int TP = 4000;	// 400 pips
+int SL = 130;	// 13 pips
+int TP = 10000;	// 1000 pips
 int TrailingStop = 20;
 double lots = 0.01;
 double spread = 0.0;
@@ -79,6 +79,7 @@ int start () {
 		ticket = -1;
 		wait_trade = true;
 		detect_profit = false;
+		kumo_state = FLAT_KUMO;
 	}
 	
 	for (int i=0; i<26; i++) {
@@ -90,8 +91,8 @@ int start () {
 		chinkou_span[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_CHINKOUSPAN, i);
 	}
 	
-	macd_main = iMACD(Symbol(), period, 12, 26, 9, PRICE_CLOSE, MODE_MAIN, 1);
-	macd_signal = iMACD(Symbol(), period, 12, 26, 9, PRICE_CLOSE, MODE_SIGNAL, 1);
+	//macd_main = iMACD(Symbol(), period, 12, 26, 9, PRICE_CLOSE, MODE_MAIN, 1);
+	//macd_signal = iMACD(Symbol(), period, 12, 26, 9, PRICE_CLOSE, MODE_SIGNAL, 1);
 	
 	if (first_run) {
 		if (Close[1] > senkou_span_a[1] && Close[1] > senkou_span_b[1]) {
@@ -104,7 +105,7 @@ int start () {
 			first_run = false;
 		}
 		
-		return;
+		return 0;
 	}
 	
 	
@@ -133,36 +134,37 @@ int start () {
 	
 	
 	if (OrdersTotal() == 0) {
-		if (Volume[0] > 100) return;
+		//if (Volume[0] > 100) return;
 		
 		
-		double senkou_diff = MathAbs(senkou_span_a[1] - senkou_span_b[1]);
+		double senkou_diff = MathAbs(senkou_span_a[0] - senkou_span_b[0]);
 		bool sideway_break = false;
 		
-		if (senkou_diff < 0.00070 && senkou_span_a[1] > senkou_span_b[1]) {
-			if ((Close[1] - senkou_span_a[1]) > 0.0015)
+		if (senkou_diff < 0.00070 && senkou_span_a[0] > senkou_span_b[0]) {
+			if ((Close[0] - senkou_span_a[0]) > 0.0015)
 				sideway_break = true;
-		} else if (senkou_diff < 0.00070 && senkou_span_a[1] < senkou_span_b[1]) {
-			if ((Close[1] - senkou_span_b[1]) > 0.0015)
+		} else if (senkou_diff < 0.00070 && senkou_span_a[0] < senkou_span_b[0]) {
+			if ((Close[0] - senkou_span_b[0]) > 0.0015)
 				sideway_break = true;
 		}
 		
 		// open trade
 		// entry: BUY
-		if (Close[1] > kijun_sen[1] && Close[1] > senkou_span_a[1] && Close[1] > senkou_span_b[1] && 
-			tenkan_sen[1] > tenkan_sen[2] &&
-			(senkou_diff > 0.00070 || sideway_break)
-			//tenkan_sen[1] > kijun_sen[1]
-			//macd_main > macd_signal
+		if (//Close[1] > kijun_sen[1] 
+			Close[0] > kijun_sen[0] 
+			&& Close[0] > senkou_span_a[0] && Close[0] > senkou_span_b[0]  
+			&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] >= tenkan_sen[3]
+			&& (senkou_diff > 0.00070 || sideway_break)
+			//&& tenkan_sen[1] > kijun_sen[1]
 			//chinkou_span[25] > Close[25] &&
 			//Open[1] > senkou_span_a[1] && 
 			//Open[1] > senkou_span_b[1] 
-			&& wait_trade == false
-			//tenkan_sen[0] > tenkan_sen[1] &&
-			//tenkan_sen[0] > senkou_span_a[0] &&
-			//tenkan_sen[0] > senkou_span_b[0]
-			//macd_main > macd_signal
-			//&& macd_signal < 0
+			&& (Close[0] - kijun_sen[0]) > 0.0012
+			&& (wait_trade == false ||
+				(Low[0] < senkou_span_a[0] && Low[0] < senkou_span_b[0] &&
+				sideway_break)
+				)
+				
 			) {
 			
 			
@@ -182,19 +184,28 @@ int start () {
 		
 		OrderSelect(ticket, SELECT_BY_TICKET);
 		
+		// Detect Profit
+		if (Open[0] > (OrderOpenPrice()+0.00012)) 
+			detect_profit = true;
+		else
+			detect_profit = false;
 		
 		// exit: BUY
 		// TP
 		if (OrderType() == OP_BUY) {
 			if (//macd_main < macd_signal
 			//|| chinkou_span[25] < Low[25]
-			Close[0] < kijun_sen[0]
+			Close[0] < kijun_sen[0] &&
+			detect_profit == true &&
+			(Close[0] > OrderOpenPrice()+0.00012+0.00070)
 			) {
 				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
 				wait_trade = true;
 				is_trade = false;
 				//MsgBox("CLOSE: WAIT TRUE", "caption");
+				kumo_state = FLAT_KUMO;
+				detect_profit = false;
 			}
 			
 			
@@ -217,8 +228,7 @@ int start () {
 			//MsgBox("KUMO HIT", "caption");
 		}
 		*/
-		// Detect Profit
-		//if () 
+		
 	}
 	
 	
