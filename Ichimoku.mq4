@@ -4,6 +4,8 @@
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
 
+// test hook #1
+
 #property copyright "Copyright 2014, Daniel Sirait"
 #property link      "http://www.siraitx.com/"
 
