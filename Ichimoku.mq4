@@ -4,8 +4,6 @@
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
 
-// test hook #2
-
 #property copyright "Copyright 2014, Daniel Sirait"
 #property link      "http://www.siraitx.com/"
 
@@ -82,7 +80,9 @@ int start () {
 		ticket = -1;
 		wait_trade = true;
 		detect_profit = false;
-		kumo_state = FLAT_KUMO;
+		//kumo_state = FLAT_KUMO;
+		//if ()
+		//hit_sl = true;
 	}
 	
 	for (int i=0; i<26; i++) {
@@ -157,15 +157,15 @@ int start () {
 			Close[0] > kijun_sen[0] 
 			&& Close[0] > senkou_span_a[0] && Close[0] > senkou_span_b[0]  
 			&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] >= tenkan_sen[3]
-			&& (senkou_diff > 0.00070 || sideway_break)
+			//&& (senkou_diff > 0.00070 || sideway_break)
 			//&& tenkan_sen[1] > kijun_sen[1]
 			//chinkou_span[25] > Close[25] &&
 			//Open[1] > senkou_span_a[1] && 
 			//Open[1] > senkou_span_b[1] 
 			&& (Close[0] - kijun_sen[0]) > 0.0012
-			&& (wait_trade == false ||
-				(Low[0] < senkou_span_a[0] && Low[0] < senkou_span_b[0] &&
-				sideway_break)
+			&& (wait_trade == false //||
+				//(Low[0] < senkou_span_a[0] && Low[0] < senkou_span_b[0] &&
+				//sideway_break)
 				)
 				
 			) {
