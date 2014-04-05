@@ -134,7 +134,14 @@ int start () {
 	} else {
 		
 	}
-	
+	/*
+	if (kijun_sen[0] > senkou_span_a[0] 
+		&& kijun_sen[0] > senkou_span_b[0]
+		&& Open[0] < kijun_sen[0]
+		) {
+		wait_trade = false;
+	}
+	*/
 	
 	if (OrdersTotal() == 0) {
 		//if (Volume[0] > 100) return;
@@ -157,6 +164,7 @@ int start () {
 			Close[0] > kijun_sen[0] 
 			&& Close[0] > senkou_span_a[0] && Close[0] > senkou_span_b[0]  
 			&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] >= tenkan_sen[3]
+			//&& tenkan_sen[0] >= tenkan_sen[1] && tenkan_sen[0] >= tenkan_sen[2]
 			//&& (senkou_diff > 0.00070 || sideway_break)
 			//&& tenkan_sen[1] > kijun_sen[1]
 			//chinkou_span[25] > Close[25] &&
@@ -199,8 +207,8 @@ int start () {
 			if (//macd_main < macd_signal
 			//|| chinkou_span[25] < Low[25]
 			Close[0] < kijun_sen[0] &&
-			detect_profit == true &&
-			(Close[0] > OrderOpenPrice()+0.00012+0.00070)
+			detect_profit == true
+			&& (Close[0] > OrderOpenPrice()+0.00012+0.00070)
 			) {
 				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
