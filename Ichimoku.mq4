@@ -228,7 +228,7 @@ int start () {
 			detect_profit == true
 			&& (Close[0] > (OrderOpenPrice()+0.00012+0.00070))
 			) {
-				OrderClose(ticket, OrderLots(), Bid, 0, Yellow);
+				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
 				wait_trade = true;
 				is_trade = false;
@@ -243,7 +243,7 @@ int start () {
 			//&& detect_profit == true
 			&& (Close[0] < (OrderOpenPrice()+0.00012+0.00070))
 			) {
-				OrderClose(ticket, OrderLots(), Ask, 0, Yellow);
+				OrderClose(ticket, OrderLots(), Ask, 0, White);
 				ticket = -1;
 				wait_trade = true;
 				is_trade = false;
