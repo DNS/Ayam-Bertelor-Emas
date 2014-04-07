@@ -114,10 +114,17 @@ int start () {
 	
 	// BUG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (kumo_state != FLAT_KUMO && ((Close[1] < senkou_span_a[1] && Close[1] > senkou_span_b[1]) || 
-		(Close[1] > senkou_span_a[1] && Close[1] < senkou_span_b[1])) ) {
+		(Close[1] > senkou_span_a[1] && Close[1] < senkou_span_b[1]) ) ) {
 		kumo_state = FLAT_KUMO;
 		wait_trade = true;
-	}	
+	} else if (kumo_state != FLAT_KUMO && 
+		((Close[0] < senkou_span_a[0] && Close[0] > senkou_span_b[0]) || 
+		(Close[0] > senkou_span_a[0] && Close[0] < senkou_span_b[0]) )
+		
+		) {
+		//kumo_state = FLAT_KUMO;
+		//wait_trade = true;
+	}
 		
 	if (wait_trade) {
 		if (kumo_state != UP_KUMO && Close[1] > senkou_span_a[1] && Close[1] > senkou_span_b[1]) {
@@ -126,8 +133,9 @@ int start () {
 			//MsgBox("WAIT_FALSE DOWN", "caption");
 		} else if (kumo_state != DOWN_KUMO && Close[1] < senkou_span_a[1] && Close[1] < senkou_span_b[1]) {
 			kumo_state = DOWN_KUMO;
-			wait_trade = true;
+			wait_trade = false;
 			//MsgBox("WAIT_FALSE UP", "caption");
+		
 		} else {
 			//return;
 		}
@@ -146,7 +154,7 @@ int start () {
 	if (OrdersTotal() == 0) {
 		//if (Volume[0] > 100) return;
 		
-		
+		/*
 		double senkou_diff = MathAbs(senkou_span_a[0] - senkou_span_b[0]);
 		bool sideway_break = false;
 		
@@ -156,7 +164,7 @@ int start () {
 		} else if (senkou_diff < 0.00070 && senkou_span_a[0] < senkou_span_b[0]) {
 			if ((Close[0] - senkou_span_b[0]) > 0.0015)
 				sideway_break = true;
-		}
+		}*/
 		
 		// open trade
 		// entry: BUY
@@ -179,7 +187,6 @@ int start () {
 			) {
 			
 			
-			//ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, stop_loss, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			if (ticket != -1) is_trade = true;
 			/*
@@ -188,6 +195,19 @@ int start () {
 			else if (kumo_state == UP_KUMO)
 				MsgBox("UP_KUMO", "caption");
 			*/
+			
+		// entry: SELL
+		} else if (
+			Close[0] < kijun_sen[0] 
+			&& Close[0] < senkou_span_a[0] && Close[0] < senkou_span_b[0]  
+			//&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] <= tenkan_sen[3]
+			&& (kijun_sen[0] - Close[0]) > 0.0012
+			&& wait_trade == false
+			) {
+			
+			ticket = OrderSend(Symbol(), OP_SELL, lots, Bid, 3, Ask+SL*Point, Ask-TP*Point, NULL, MAGICNUMBER, 0, Red);
+			if (ticket != -1) is_trade = true;
+			
 		}
 		
 	} else {
@@ -204,13 +224,11 @@ int start () {
 		// exit: BUY
 		// TP
 		if (OrderType() == OP_BUY) {
-			if (//macd_main < macd_signal
-			//|| chinkou_span[25] < Low[25]
-			Close[0] < kijun_sen[0] &&
+			if (Close[0] < kijun_sen[0] &&
 			detect_profit == true
-			&& (Close[0] > OrderOpenPrice()+0.00012+0.00070)
+			&& (Close[0] > (OrderOpenPrice()+0.00012+0.00070))
 			) {
-				OrderClose(ticket, OrderLots(), Bid, 0, White);
+				OrderClose(ticket, OrderLots(), Bid, 0, Yellow);
 				ticket = -1;
 				wait_trade = true;
 				is_trade = false;
@@ -219,10 +237,23 @@ int start () {
 				detect_profit = false;
 			}
 			
-			
-		} // end BUY
-			
+		// exit: SELL
+		} else if (OrderType() == OP_SELL) {
+			if (Close[0] > kijun_sen[0]
+			//&& detect_profit == true
+			&& (Close[0] < (OrderOpenPrice()+0.00012+0.00070))
+			) {
+				OrderClose(ticket, OrderLots(), Ask, 0, Yellow);
+				ticket = -1;
+				wait_trade = true;
+				is_trade = false;
+				//MsgBox("CLOSE: WAIT TRUE", "caption");
+				kumo_state = FLAT_KUMO;
+				detect_profit = false;
+			}
 		
+		
+		}
 		// SL
 		/*
 		double stop_loss;
