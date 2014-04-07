@@ -9,7 +9,6 @@
 
 #define MAGICNUMBER  06112013
 
-
 #import "Ayam Bertelor Emas.dll"
 void MsgBox (string, string);
 
