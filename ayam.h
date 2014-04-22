@@ -67,7 +67,7 @@ __declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
 __declspec(dllexport) void __cdecl ayam_deinit ();
 __declspec(dllexport) void ayam_mt4stoploss();
 
-__declspec(dllexport) void MsgBox (const char *, const char *);
+__declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 
 #ifdef __cplusplus
 }

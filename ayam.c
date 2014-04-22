@@ -335,8 +335,8 @@ FLOAT pips2point (FLOAT val_pips) {
 
 
 
-void MsgBox (const char *text, const char *caption) {
-	MessageBoxA(NULL, text, caption, MB_OK);
+void winapi_MessageBoxW (const WCHAR *text, const WCHAR *caption) {
+	MessageBoxW(NULL, text, caption, MB_OK);
 }
 
 
