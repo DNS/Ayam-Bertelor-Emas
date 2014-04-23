@@ -21,6 +21,7 @@ int TP = 10000;	// 1000 pips
 int TrailingStop = 20;
 double lots = 0.01;
 double spread = 0.0;
+int leverage = 1;
 string buf;
 int ticket = -1;
 int period = PERIOD_H1;
@@ -41,7 +42,7 @@ int OnInit () {
 		winapi_MessageBoxW("Trade not allowed!, please consult your broker.", "Error!");
 	}
 	
-	get_spread();
+	getMarketData();
 	
 	return(INIT_SUCCEEDED);
 }
@@ -55,7 +56,7 @@ void OnDeinit (const int reason) {
 
 
 void OnTick () {
-	//get_spread();
+	//getMarketData();
 	
 	for (int i=0; i<30; i++) {
 		// shift 1
@@ -81,7 +82,7 @@ void OnTick () {
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 		
 		
-		// entry: SELL	
+		// entry: SELL
 		} else if (Bid < kijun_sen[0]
 			&& Bid < senkou_span_a[0] && Bid < senkou_span_b[0]
 			&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
@@ -97,6 +98,7 @@ void OnTick () {
 	
 	// exit order
 	} else {
+		if (Volume[0] > 100) return;
 		OrderSelect(ticket, SELECT_BY_TICKET);
 		
 		if (OrderType() == OP_BUY) {
@@ -122,7 +124,9 @@ void OnTick () {
 }
 
 
-void get_spread () {
-	spread = MarketInfo(Symbol(), MODE_SPREAD) * 1E-5;
-	Comment("Spread: ", spread);
+void getMarketData () {
+	spread = MarketInfo(Symbol(), MODE_SPREAD) * 1e-5;
+	leverage = AccountLeverage();
+	Comment("Spread ", spread, "\nLeverage 1:", leverage);
 }
+
