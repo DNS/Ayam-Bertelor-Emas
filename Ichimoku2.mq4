@@ -74,7 +74,7 @@ void OnTick () {
 		if (Ask > kijun_sen[0]
 			&& Ask > senkou_span_a[0] && Ask > senkou_span_b[0]
 			&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] > tenkan_sen[3]
-			&& chinkou_span[26] > Close[26]
+			&& chinkou_span[26] > High[26]
 			&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26] 
 		
 			) {
@@ -86,7 +86,7 @@ void OnTick () {
 		} else if (Bid < kijun_sen[0]
 			&& Bid < senkou_span_a[0] && Bid < senkou_span_b[0]
 			&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
-			&& chinkou_span[26] < Close[26]
+			&& chinkou_span[26] < Low[26]
 			&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26] 
 		) {
 			
@@ -98,7 +98,18 @@ void OnTick () {
 	
 	// exit order
 	} else {
-		if (Volume[0] > 100) return;
+	
+	
+		// Detect Profit
+		if (Bid > OrderOpenPrice() && OrderType() == OP_BUY) 
+			detect_profit = true;
+		else if (Ask > OrderOpenPrice() && OrderType() == OP_SELL)
+			detect_profit = false;
+			
+		if (Volume[0] > 100 && detect_profit == false) return;
+		
+		
+		
 		OrderSelect(ticket, SELECT_BY_TICKET);
 		
 		if (OrderType() == OP_BUY) {
