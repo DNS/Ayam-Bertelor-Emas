@@ -70,13 +70,15 @@ void OnTick () {
 	
 	
 	if (OrdersTotal() == 0) {
+		//if (Volume[0] > 100) return;
+	
 		// entry: BUY
 		if (Ask > kijun_sen[0]
 			&& Ask > senkou_span_a[0] && Ask > senkou_span_b[0]
-			&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] > tenkan_sen[3]
+			//&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] > tenkan_sen[3]
 			&& chinkou_span[26] > High[26]
-			&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26] 
-		
+			&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26]
+			&& chinkou_span[26] != 0.0
 			) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
@@ -85,9 +87,10 @@ void OnTick () {
 		// entry: SELL
 		} else if (Bid < kijun_sen[0]
 			&& Bid < senkou_span_a[0] && Bid < senkou_span_b[0]
-			&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
+			//&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
 			&& chinkou_span[26] < Low[26]
-			&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26] 
+			&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26]
+			&& chinkou_span[26] != 0.0
 		) {
 			
 			//winapi_MessageBoxW(DoubleToStr(chinkou_span[26], 5), "DEBUG");
@@ -103,7 +106,9 @@ void OnTick () {
 		// Detect Profit
 		if (Bid > OrderOpenPrice() && OrderType() == OP_BUY) 
 			detect_profit = true;
-		else if (Ask > OrderOpenPrice() && OrderType() == OP_SELL)
+		else if (Ask < OrderOpenPrice() && OrderType() == OP_SELL)
+			detect_profit = true;
+		else
 			detect_profit = false;
 			
 		if (Volume[0] > 100 && detect_profit == false) return;
@@ -112,14 +117,14 @@ void OnTick () {
 		
 		OrderSelect(ticket, SELECT_BY_TICKET);
 		
-		if (OrderType() == OP_BUY) {
+		if (OrderType() == OP_BUY && detect_profit) {
 			if (Bid < kijun_sen[0]) {
 				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
 			
 			}
 		
-		} else if (OrderType() == OP_SELL) {
+		} else if (OrderType() == OP_SELL && detect_profit) {
 			if (Ask > kijun_sen[0]) {
 				OrderClose(ticket, OrderLots(), Ask, 0, White);
 				ticket = -1;
