@@ -30,6 +30,8 @@ bool is_trade = false;
 bool wait_trade = true;
 bool first_run = true;
 bool detect_profit = false;
+bool skip_bar = true;
+int count_bar = 0;
 
 double tenkan_sen[30];
 double kijun_sen[30];
@@ -68,9 +70,27 @@ void OnTick () {
 	}
 	
 	
+	// hit SL/TP
+	if (is_trade == true && OrdersTotal() == 0) {
+		is_trade = false;
+		ticket = -1;
+		wait_trade = true;
+		detect_profit = false;
+		skip_bar = true;
+		count_bar = 0;
+	}
 	
-	if (OrdersTotal() == 0) {
-		//if (Volume[0] > 100) return;
+	
+	if (Volume[0] == 1 && skip_bar == true) {
+		//winapi_MessageBoxW("skip_bar", "DEBUG");
+		if (count_bar >= 5) {
+			skip_bar = false;
+			count_bar = 0;
+		} else
+			count_bar++;
+	}
+	
+	if (OrdersTotal() == 0 && skip_bar == false) {
 	
 		// entry: BUY
 		if (Ask > kijun_sen[0]
@@ -82,7 +102,7 @@ void OnTick () {
 			) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
-		
+			is_trade = true;
 		
 		// entry: SELL
 		} else if (Bid < kijun_sen[0]
@@ -95,12 +115,12 @@ void OnTick () {
 			
 			//winapi_MessageBoxW(DoubleToStr(chinkou_span[26], 5), "DEBUG");
 			ticket = OrderSend(Symbol(), OP_SELL, lots, Bid, 3, Ask+SL*Point, Ask-TP*Point, NULL, MAGICNUMBER, 0, Red);
-			
+			is_trade = true;
 		}
 	
 	
 	// exit order
-	} else {
+	} else if (OrdersTotal() != 0) {
 	
 	
 		// Detect Profit
@@ -113,22 +133,28 @@ void OnTick () {
 			
 		if (Volume[0] > 100 && detect_profit == false) return;
 		
+		double pl = 0.0;
+		if (OrderType() == OP_BUY) pl = Bid - OrderOpenPrice();
+		if (OrderType() == OP_SELL) pl = OrderOpenPrice() - Ask;
 		
+		OrderSelect(ticket, SELECT_BY_TICKET, MODE_TRADES);
 		
-		OrderSelect(ticket, SELECT_BY_TICKET);
-		
-		if (OrderType() == OP_BUY && detect_profit) {
+		if (OrderType() == OP_BUY && detect_profit && pl > 0.0007) {
 			if (Bid < kijun_sen[0]) {
 				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
-			
+				skip_bar = true;
+				is_trade = false;
+				count_bar = 0;
 			}
 		
-		} else if (OrderType() == OP_SELL && detect_profit) {
+		} else if (OrderType() == OP_SELL && detect_profit && pl > 0.0007) {
 			if (Ask > kijun_sen[0]) {
 				OrderClose(ticket, OrderLots(), Ask, 0, White);
 				ticket = -1;
-			
+				skip_bar = true;
+				is_trade = false;
+				count_bar = 0;
 			}
 		}
 		
