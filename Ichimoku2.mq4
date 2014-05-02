@@ -81,15 +81,17 @@ void OnTick () {
 	
 	if (Volume[0] == 1 && skip_bar == true) {
 		//winapi_MessageBoxW("skip_bar", "DEBUG");
-		if (count_bar >= 5) {
+		if (count_bar >= 3) {
 			skip_bar = false;
 			count_bar = 0;
 		} else
 			count_bar++;
 	}
 	
-	if (OrdersTotal() == 0 && skip_bar == false) {
-	
+	if (OrdersTotal() == 0 
+		&& skip_bar == false
+		) {
+		
 		// entry: BUY
 		if (Ask > kijun_sen[0]
 			&& Ask > senkou_span_a[0] && Ask > senkou_span_b[0]
@@ -97,6 +99,7 @@ void OnTick () {
 			&& chinkou_span[26] > High[26]
 			&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26]
 			&& chinkou_span[26] != 0.0
+			//&& kijun_sen[0] > kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
 			) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
@@ -109,7 +112,8 @@ void OnTick () {
 			&& chinkou_span[26] < Low[26]
 			&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26]
 			&& chinkou_span[26] != 0.0
-		) {
+			//&& kijun_sen[0] < kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
+			) {
 			
 			//winapi_MessageBoxW(DoubleToStr(chinkou_span[26], 5), "DEBUG");
 			ticket = OrderSend(Symbol(), OP_SELL, lots, Bid, 3, Ask+SL*Point, Ask-TP*Point, NULL, MAGICNUMBER, 0, Red);
