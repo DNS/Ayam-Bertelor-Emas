@@ -38,6 +38,7 @@ double kijun_sen[30];
 double senkou_span_a[30];
 double senkou_span_b[30];
 double chinkou_span[30];
+double sd[30];
 
 int OnInit () {
 	if (!IsTradeAllowed()) {
@@ -58,6 +59,8 @@ void OnDeinit (const int reason) {
 void OnTick () {
 	//getMarketData();
 	
+	if(Bars<100) return;
+	
 	for (int i=0; i<30; i++) {
 		// shift 1
 		tenkan_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_TENKANSEN, i);
@@ -65,6 +68,8 @@ void OnTick () {
 		senkou_span_a[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANA, i);
 		senkou_span_b[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANB, i);
 		chinkou_span[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_CHINKOUSPAN, i);
+		//sd[i] = iStdDev(Symbol(), period, 26, 0, MODE_SMA, PRICE_CLOSE, i); 
+
 	}
 	
 	
@@ -81,7 +86,7 @@ void OnTick () {
 	
 	if (Volume[0] == 1 && skip_bar == true) {
 		//winapi_MessageBoxW("skip_bar", "DEBUG");
-		if (count_bar >= 3) {
+		if (count_bar >= 5) {
 			skip_bar = false;
 			count_bar = 0;
 		} else
@@ -100,6 +105,7 @@ void OnTick () {
 			&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26]
 			&& chinkou_span[26] != 0.0
 			//&& kijun_sen[0] > kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
+			//&& sd[0] > sd[1] && sd[1] > sd[2] && sd[2] > sd[3] && sd[3] > sd[4]
 			) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
@@ -113,6 +119,7 @@ void OnTick () {
 			&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26]
 			&& chinkou_span[26] != 0.0
 			//&& kijun_sen[0] < kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
+			//&& sd[0] > sd[1] && sd[1] > sd[2] && sd[2] > sd[3] && sd[3] > sd[4]
 			) {
 			
 			//winapi_MessageBoxW(DoubleToStr(chinkou_span[26], 5), "DEBUG");
