@@ -33,7 +33,7 @@ bool detect_profit = false;
 bool skip_bar = false;
 int count_bar = 0;
 
-double k = 1.5;
+double k = 2.0;
 
 double tenkan_sen[30];
 double kijun_sen[30];
@@ -41,9 +41,7 @@ double senkou_span_a[30];
 double senkou_span_b[30];
 double chinkou_span[30];
 double sd[30];
-double bb_up[30];
-double bb_down[30];
-double bb_diff;
+double ma[30];
 
 
 void OnTimer () {
@@ -101,8 +99,7 @@ void OnTick () {
 		senkou_span_b[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANB, i);
 		chinkou_span[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_CHINKOUSPAN, i);
 		sd[i] = iStdDev(Symbol(), period, 20, 0, MODE_SMA, PRICE_CLOSE, i);
-		//bb_up[i] = iBands(Symbol(), period, 20, 2.0, 0, PRICE_CLOSE, MODE_UPPER, i);
-		//bb_down[i] = iBands(Symbol(), period, 20, 2.0, 0, PRICE_CLOSE, MODE_LOWER, i);
+		ma[i] = iMA(Symbol(), period, 20, 0, MODE_SMMA, PRICE_CLOSE, i);
 	}
 	
 	//bb_diff = bb_up[0] - bb_down[0];
@@ -121,7 +118,7 @@ void OnTick () {
 	
 	if (Volume[0] == 1 && skip_bar == true) {
 		//winapi_MessageBoxW("skip_bar", "DEBUG");
-		if (count_bar >= 5) {
+		if (count_bar >= 3) {
 			skip_bar = false;
 			count_bar = 0;
 		} else
@@ -135,14 +132,15 @@ void OnTick () {
 		// entry: BUY
 		if (Ask > kijun_sen[0]
 			&& Ask > senkou_span_a[0] && Ask > senkou_span_b[0]
+			&& ma[1] > ma[2]
 			//&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] > tenkan_sen[3]
 			//&& chinkou_span[26] > High[26]
 			//&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26]
 			//&& chinkou_span[26] != 0.0
 			//&& kijun_sen[0] > kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
-			&& (sd[1]*k < sd[0] || sd[2]*k < sd[0] || sd[3]*k < sd[0] || sd[4]*k < sd[0] || sd[5]*k < sd[0]
-				 || sd[6]*k < sd[0] || sd[7]*k < sd[0] || sd[8]*k < sd[0]
-				)
+			//&& (sd[1]*k <= sd[0] || sd[2]*k <= sd[0] || sd[3]*k <= sd[0] || sd[4]*k <= sd[0] || sd[5]*k <= sd[0]
+				 //|| sd[6]*k <= sd[0] || sd[7]*k <= sd[0] || sd[8]*k <= sd[0]
+				//)
 			) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
@@ -150,15 +148,16 @@ void OnTick () {
 		
 		// entry: SELL
 		} else if (Bid < kijun_sen[0]
+			&& ma[1] < ma[2]
 			&& Bid < senkou_span_a[0] && Bid < senkou_span_b[0]
 			//&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
 			//&& chinkou_span[26] < Low[26]
 			//&& chinkou_span[26] < senkou_span_a[26] && chinkou_span[26] < senkou_span_b[26]
 			//&& chinkou_span[26] != 0.0
 			//&& kijun_sen[0] < kijun_sen[10] && kijun_sen[5] > kijun_sen[10]
-			&& (sd[1]*k < sd[0] || sd[2]*k < sd[0] || sd[3]*k < sd[0] || sd[4]*k < sd[0] || sd[5]*k < sd[0]
-				 || sd[6]*k < sd[0] || sd[7]*k < sd[0] || sd[8]*k < sd[0]
-				)
+			//&& (sd[1]*k <= sd[0] || sd[2]*k <= sd[0] || sd[3]*k <= sd[0] || sd[4]*k <= sd[0] || sd[5]*k <= sd[0]
+				 //|| sd[6]*k <= sd[0] || sd[7]*k <= sd[0] || sd[8]*k <= sd[0]
+				//)
 			) {
 			
 			//winapi_MessageBoxW(DoubleToStr(chinkou_span[26], 5), "DEBUG");
@@ -219,4 +218,18 @@ void getMarketData () {
 	leverage = AccountLeverage();
 	Comment("Spread ", spread, "\nLeverage 1:", leverage);
 }
+
+enum FORECAST {
+	DOWN = 1,
+	UP = 2
+};
+
+
+FORECAST analyze_market () {
+	FORECAST f;
+	f = DOWN;
+
+	return f;
+}
+
 
