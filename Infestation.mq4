@@ -35,13 +35,21 @@ int count_bar = 0;
 
 double k = 2.0;
 
-double tenkan_sen[30];
-double kijun_sen[30];
-double senkou_span_a[30];
-double senkou_span_b[30];
-double chinkou_span[30];
-double sd[30];
-double ma[30];
+double tenkan_sen[90];
+double kijun_sen[90];
+double senkou_span_a[90];
+double senkou_span_b[90];
+double chinkou_span[90];
+double sd[90];
+double ma[90];
+
+
+enum FORECAST {
+	FC_FLAT = 0,
+	FC_SHORT = 1,
+	FC_LONG = 2
+} forecast;
+
 
 
 void OnTimer () {
@@ -72,8 +80,11 @@ void OnChartEvent (const int id, const long &lparam, const double &dparam, const
 
 int OnInit () {
 	if (!IsTradeAllowed()) {
-		winapi_MessageBoxW("Trade not allowed!, please consult your broker.", "Error!");
+		//winapi_MessageBoxW("Trade not allowed!, please consult your broker.", "Error!");
+		MessageBox("Trade not allowed!, please consult your broker.", "DEBUG");
 	}
+	
+	//winapi_MessageBoxW("OnTester()\n Back init", "DEBUG");
 	
 	getMarketData();
 	
@@ -88,10 +99,9 @@ void OnDeinit (const int reason) {
 
 void OnTick () {
 	//getMarketData();
+	if(Bars<90) return;
 	
-	if(Bars<=1) return;
-	
-	for (int i=0; i<30; i++) {
+	for (int i=0; i<90; i++) {
 		// shift 1
 		tenkan_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_TENKANSEN, i);
 		kijun_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_KIJUNSEN, i);
@@ -102,8 +112,8 @@ void OnTick () {
 		ma[i] = iMA(Symbol(), period, 20, 0, MODE_SMMA, PRICE_CLOSE, i);
 	}
 	
-	//bb_diff = bb_up[0] - bb_down[0];
-	
+	//winapi_MessageBoxW("tick", "DEBUG");
+	analyze_market();
 	
 	// hit SL/TP
 	if (is_trade == true && OrdersTotal() == 0) {
@@ -118,7 +128,7 @@ void OnTick () {
 	
 	if (Volume[0] == 1 && skip_bar == true) {
 		//winapi_MessageBoxW("skip_bar", "DEBUG");
-		if (count_bar >= 3) {
+		if (count_bar >= 1) {
 			skip_bar = false;
 			count_bar = 0;
 		} else
@@ -130,9 +140,12 @@ void OnTick () {
 		) {
 		
 		// entry: BUY
-		if (Ask > kijun_sen[0]
+		if (
+			forecast == FC_LONG
+			
+			//Ask > kijun_sen[0]
 			&& Ask > senkou_span_a[0] && Ask > senkou_span_b[0]
-			&& ma[1] > ma[2]
+			//&& ma[1] > ma[2]
 			//&& tenkan_sen[1] >= tenkan_sen[2] && tenkan_sen[1] > tenkan_sen[3]
 			//&& chinkou_span[26] > High[26]
 			//&& chinkou_span[26] > senkou_span_a[26] && chinkou_span[26] > senkou_span_b[26]
@@ -147,8 +160,10 @@ void OnTick () {
 			is_trade = true;
 		
 		// entry: SELL
-		} else if (Bid < kijun_sen[0]
-			&& ma[1] < ma[2]
+		} else if (
+			forecast == FC_SHORT
+			//Bid < kijun_sen[0]
+			//&& ma[1] < ma[2]
 			&& Bid < senkou_span_a[0] && Bid < senkou_span_b[0]
 			//&& tenkan_sen[1] <= tenkan_sen[2] && tenkan_sen[1] < tenkan_sen[3]
 			//&& chinkou_span[26] < Low[26]
@@ -219,17 +234,44 @@ void getMarketData () {
 	Comment("Spread ", spread, "\nLeverage 1:", leverage);
 }
 
-enum FORECAST {
-	DOWN = 1,
-	UP = 2
-};
 
 
-FORECAST analyze_market () {
-	FORECAST f;
-	f = DOWN;
 
-	return f;
+
+void analyze_market () {
+	int down_trend = 0, up_trend = 0;
+	int total_bar = 84;					//12 * 7;
+	
+	for (int i=1; i<total_bar; i++) {
+		if (Close[i] > senkou_span_a[i] && Close[i] > senkou_span_b[i]) {
+			up_trend++;
+		} else if (Close[i] < senkou_span_a[i] && Close[i] < senkou_span_b[i]) {
+			down_trend++;
+		} else {
+			if (up_trend > down_trend) up_trend++;
+			else if (up_trend < down_trend) down_trend++;
+		}
+	}
+	
+	// search for reversal
+	if (up_trend > down_trend) {
+		forecast = FC_SHORT;
+	} else if (down_trend > up_trend) {
+		forecast = FC_LONG;
+	} else {
+		forecast = FC_FLAT;
+	}
+		
+	
+	
+	//MessageBox("txt", "DEBUG");
+	
+	/*if (forecast == FC_SHORT) 
+		winapi_MessageBoxW("txt", "DEBUG");
+	else if (forecast == FC_LONG) 
+		winapi_MessageBoxW("txt", "DEBUG");
+		*/
+	
 }
 
 
