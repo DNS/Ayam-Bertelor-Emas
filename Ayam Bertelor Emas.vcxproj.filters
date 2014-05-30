@@ -29,5 +29,8 @@
     <ClInclude Include="darray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="typemacro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

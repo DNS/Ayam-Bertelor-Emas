@@ -15,9 +15,12 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 
 #include <windows.h>
 
+#include "typemacro.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 //typedef enum {
 //	MARKET_OPEN_FLAT = 0,
@@ -46,8 +49,8 @@ extern "C" {
 
 typedef struct _ORDER {
 	DWORD type;
-	bool state;
-	float open_order;
+	BOOL state;
+	FLOAT open_order;
 } ORDER;
 
 typedef enum {
@@ -55,18 +58,18 @@ typedef enum {
 	ANALYZE_CLOSE = 1002
 } ANALYZE;
 
-//MARKET_ACTION open_market ();
-//MARKET_ACTION close_market ();
-//void test_test_123 ();
-//void calc_sma ();
-//void calc_stddev ();
-//FLOAT pips2point(FLOAT);
-//void reset_order();
+MARKET_ACTION open_market ();
+MARKET_ACTION close_market ();
+void test_test_123 ();
+void calc_sma ();
+void calc_stddev ();
+FLOAT pips2point(FLOAT);
+void reset_order();
 
-//__declspec(dllexport) void __cdecl ayam_init (DWORD);
-//__declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
-//__declspec(dllexport) void __cdecl ayam_deinit ();
-//__declspec(dllexport) void ayam_mt4stoploss();
+__declspec(dllexport) void __cdecl ayam_init (DWORD);
+__declspec(dllexport) DWORD __cdecl ayam_start (double, ANALYZE);
+__declspec(dllexport) void __cdecl ayam_deinit ();
+__declspec(dllexport) void ayam_mt4stoploss();
 
 __declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 

@@ -16,7 +16,6 @@ Disclaimer  : I CAN UNDER NO CIRCUMSTANCES BE HELD RESPONSIBLE FOR
 
 #include "darray.h"
 
-
 ARRAY_FLOAT *arrayFloat_new () {
 	ARRAY_FLOAT *arr;
 	arr = malloc(sizeof(ARRAY_FLOAT));
@@ -77,18 +76,18 @@ float arrayFloat_get (ARRAY_FLOAT *arr, DWORD index) {
 }
 
 
-bool arrayFloat_set (ARRAY_FLOAT *arr, DWORD index, float val) {
+BOOL arrayFloat_set (ARRAY_FLOAT *arr, DWORD index, float val) {
 	DWORD block_index;
 	DWORD el_index;
 	
 	if (arrayFloat_size(arr)-1 < index)
-		return false;
+		return FALSE;
 	
 	block_index = index / ARRAY_BLOCK_CAPACITY;
 	el_index = index % ARRAY_BLOCK_CAPACITY;
 	arr->blocks[block_index].elements[el_index] = val;
 	
-	return true;
+	return TRUE;
 }
 
 
@@ -138,7 +137,7 @@ void arrayFloat_clear (ARRAY_FLOAT *arr) {
 }
 
 /* TODO: SLOW, NEED OPTIMIZATION */
-bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
+BOOL arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
 	DWORD i, total_remove, removed_block, size, new_element_size;
 	DWORD startBlock, endCopyBlock, endBlock, currBlock, currIndex;
 	DWORD old_block_size, new_block_size;
@@ -146,7 +145,7 @@ bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
 	
 	size = arrayFloat_size(arr);
 	
-	if (fromIndex > toIndex || fromIndex < 0 || toIndex > size || arr->element_size <= 0) return false;
+	if (fromIndex > toIndex || fromIndex < 0 || toIndex > size || arr->element_size <= 0) return FALSE;
 	
 	
 	/*
@@ -194,19 +193,19 @@ bool arrayFloat_trim (ARRAY_FLOAT *arr, DWORD fromIndex, DWORD toIndex) {
 	
 	arr->capacity = ARRAY_BLOCK_CAPACITY * arr->block_size;
 	
-	return true;
+	return TRUE;
 }
 
 /* shrink to size */
-bool arrayFloat_shrink(ARRAY_FLOAT *arr, DWORD shrink_size) {
+BOOL arrayFloat_shrink(ARRAY_FLOAT *arr, DWORD shrink_size) {
 	DWORD size, shrink_index;
 	size = arrayFloat_size(arr);
 	
-	if (shrink_size >= size) return false;
+	if (shrink_size >= size) return FALSE;
 	
 	arrayFloat_trim(arr, shrink_size, size-1);
 	
-	return true;
+	return TRUE;
 }
 
 void arrayFloat_iterator (ARRAY_FLOAT *arr, void (*callback)(DWORD index, float val)) {
