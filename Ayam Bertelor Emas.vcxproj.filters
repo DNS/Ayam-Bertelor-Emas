@@ -21,6 +21,9 @@
     <ClCompile Include="darray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hg-hook-twitter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ayam.h">

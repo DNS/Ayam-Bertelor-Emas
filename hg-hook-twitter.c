@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <direct.h>
+
 
 void strip_newline (char *name) {
 	size_t ln = strlen(name) - 1;
@@ -16,7 +18,7 @@ int main (int argc, const char **argv, const char **env) {
 	char repo_name[256], *tok;
 	FILE *pPipe;
 
-	//puts(argv[1]);
+	puts(argv[1]);
 	chdir(argv[1]);
 
 	if( (pPipe = _popen( "hg log -r tip --template \"{author}\"", "rt" )) == NULL ) exit(1);
@@ -79,9 +81,9 @@ int main (int argc, const char **argv, const char **env) {
 	
 	);
 	
-	//puts(buf);
-	
-	system(buf);
+	puts(buf);
+	getchar();
+	//system(buf);
 	
 	
 	return 0;
