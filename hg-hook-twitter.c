@@ -76,14 +76,14 @@ int main (int argc, const char **argv, const char **env) {
 	"%s" \
 	"/commits/" \
 	"%s\"",
-	author, repo_name, commit_msg, paths_default, node
+	"SiraitX", repo_name, commit_msg, paths_default, node
 	
 	
 	);
 	
-	puts(buf);
-	getchar();
-	//system(buf);
+	//puts(buf);
+	//getchar();
+	system(buf);
 	
 	
 	return 0;
