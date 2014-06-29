@@ -3,10 +3,11 @@
 //|                                    Copyright 2014, Daniel Sirait |
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
+
 #property copyright "Copyright 2014, Daniel Sirait"
 #property link"http://www.siraitx.com/"
 #property version "1.00"
-#property description "Infestation v0.0.1-alpha"
+#property description "Infestation v0.0.2 (High Low trade based on MA)"
 #property strict
 
 #define MAGICNUMBER  12052014
