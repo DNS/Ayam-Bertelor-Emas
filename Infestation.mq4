@@ -100,17 +100,17 @@ void OnDeinit (const int reason) {
 
 void OnTick () {
 	//getMarketData();
-	if(Bars<90) return;
+	if(Bars<201) return;
 	
-	for (int i=0; i<90; i++) {
+	for (int i=1; i<=50; i++) {
 		// shift 1
 		//tenkan_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_TENKANSEN, i);
-		kijun_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_KIJUNSEN, i);
-		senkou_span_a[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANA, i);
-		senkou_span_b[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANB, i);
+		//kijun_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_KIJUNSEN, i);
+		//senkou_span_a[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANA, i);
+		//senkou_span_b[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANB, i);
 		//chinkou_span[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_CHINKOUSPAN, i);
 		//sd[i] = iStdDev(Symbol(), period, 20, 0, MODE_SMA, PRICE_CLOSE, i);
-		ma[i] = iMA(Symbol(), period, 52, 0, MODE_SMA, PRICE_CLOSE, i);
+		ma[i-1] = iMA(Symbol(), period, 200, 0, MODE_SMA, PRICE_CLOSE, i);
 	}
 	
 	//winapi_MessageBoxW("tick", "DEBUG");
@@ -146,24 +146,13 @@ void OnTick () {
 		) {
 		
 		// entry: BUY
-		if (
-			(forecast == FC_LONG && Ask > senkou_span_a[0] && Ask > senkou_span_b[0]) ||
-			(forecast == FC_LONG_FORCE && Ask > senkou_span_a[0]) ||
-			(forecast == FC_LONG_FORCE && Ask > senkou_span_b[0])
-			
-			//Ask > kijun_sen[0]
-			) {
+		if (forecast == FC_LONG) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			is_trade = true;
 		
 		// entry: SELL
-		} else if (
-			(forecast == FC_SHORT && Bid < senkou_span_a[0] && Bid < senkou_span_b[0]) || 
-			(forecast == FC_SHORT_FORCE && Bid < senkou_span_a[0]) ||
-			(forecast == FC_SHORT_FORCE && Bid < senkou_span_b[0])
-			//Bid < kijun_sen[0]
-			) {
+		} else if (forecast == FC_SHORT) {
 			
 			ticket = OrderSend(Symbol(), OP_SELL, lots, Bid, 3, Ask+SL*Point, Ask-TP*Point, NULL, MAGICNUMBER, 0, Red);
 			is_trade = true;
@@ -239,7 +228,23 @@ void getMarketData () {
 }
 
 
-
+void read_ma () {
+	bool result = TRUE;
+	
+	if (ma[0] > ma[1]) {
+		for (int i=1; i<=20; i++) {
+			if (ma[1] > ma[i]) { result = FALSE; break; }
+		}
+		if (result == true) forecast = FC_LONG;
+	} else if (ma[0] < ma[1]) {
+		for (int i=1; i<=20; i++) {
+			if (ma[1] < ma[i]) { result = FALSE; break; }
+		}
+		
+		if (result == true) forecast = FC_SHORT;
+	}
+	
+}
 
 
 void analyze_market () {
