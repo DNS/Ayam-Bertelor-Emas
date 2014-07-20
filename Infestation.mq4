@@ -22,7 +22,7 @@ int TP = (1000) * 10;	// 1000 pips
 int TrailingStop = 20;
 double lots = 0.01;
 double spread = 0.0;
-int leverage = 1;	// set initial leverage value
+int leverage = 1;	// set normal leverage value : 1
 string buf;
 int ticket = -1;
 int period = PERIOD_H1;
@@ -42,7 +42,10 @@ double senkou_span_a[90];
 double senkou_span_b[90];
 double chinkou_span[90];
 double sd[90];
-double ma[90];
+double ma_slow[90];
+double ma_fast[90];
+int trend_bar;		// (+) : upper ma200.  (-) : below ma200.
+double pl;
 
 
 enum FORECAST {
@@ -69,7 +72,7 @@ double OnTester () {
 
 
 void OnChartEvent (const int id, const long &lparam, const double &dparam, const string &sparam) {
-
+	
 }
 
 
@@ -85,7 +88,6 @@ int OnInit () {
 	if (!IsTradeAllowed()) {
 		winapi_MessageBoxW("Trade not allowed!, please consult your broker.", "Error!");
 	}
-	
 	
 	getMarketData();
 	
@@ -104,17 +106,12 @@ void OnTick () {
 	
 	for (int i=1; i<=50; i++) {
 		// shift 1
-		//tenkan_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_TENKANSEN, i);
-		//kijun_sen[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_KIJUNSEN, i);
-		//senkou_span_a[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANA, i);
-		//senkou_span_b[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_SENKOUSPANB, i);
-		//chinkou_span[i] = iIchimoku(Symbol(), period, 9, 26, 52, MODE_CHINKOUSPAN, i);
 		//sd[i] = iStdDev(Symbol(), period, 20, 0, MODE_SMA, PRICE_CLOSE, i);
-		ma[i-1] = iMA(Symbol(), period, 200, 0, MODE_SMA, PRICE_CLOSE, i);
+		ma_fast[i-1] = iMA(Symbol(), period, 7, 0, MODE_SMA, PRICE_CLOSE, i);
+		ma_slow[i-1] = iMA(Symbol(), period, 200, 0, MODE_SMA, PRICE_CLOSE, i);
 	}
 	
 	//winapi_MessageBoxW("tick", "DEBUG");
-	analyze_market();
 	
 	// hit SL/TP
 	if (is_trade == true && OrdersTotal() == 0) {
@@ -124,11 +121,6 @@ void OnTick () {
 		detect_profit = false;
 		skip_bar = true;
 		count_bar = 0;
-		/*if (forecast == FC_SHORT) {
-			forecast = FC_SHORT_FORCE;
-		} else if (forecast == FC_LONG) {
-			forecast = FC_LONG_FORCE;
-		}*/
 	}
 	
 	
@@ -145,14 +137,16 @@ void OnTick () {
 		&& skip_bar == false
 		) {
 		
+		read_ma();
+		
 		// entry: BUY
-		if (forecast == FC_LONG) {
+		if (forecast == FC_LONG && Ask > ma_slow[1]) {
 			
 			ticket = OrderSend(Symbol(), OP_BUY, lots, Ask, 3, Bid-SL*Point, Bid+TP*Point, NULL, MAGICNUMBER, 0, Blue);
 			is_trade = true;
 		
 		// entry: SELL
-		} else if (forecast == FC_SHORT) {
+		} else if (forecast == FC_SHORT && Bid < ma_slow[1]) {
 			
 			ticket = OrderSend(Symbol(), OP_SELL, lots, Bid, 3, Ask+SL*Point, Ask-TP*Point, NULL, MAGICNUMBER, 0, Red);
 			is_trade = true;
@@ -162,31 +156,23 @@ void OnTick () {
 	// exit order
 	} else if (OrdersTotal() != 0) {
 	
-	
 		// Detect Profit
+		detect_profit = false;
 		if (Bid > OrderOpenPrice() && OrderType() == OP_BUY) 
 			detect_profit = true;
 		else if (Ask < OrderOpenPrice() && OrderType() == OP_SELL)
 			detect_profit = true;
-		else
-			detect_profit = false;
 			
 		if (Volume[0] > 100 && detect_profit == false) return;
 		
-		double pl = 0.0;
+		pl = 0.0;
 		if (OrderType() == OP_BUY) pl = Bid - OrderOpenPrice();
 		if (OrderType() == OP_SELL) pl = OrderOpenPrice() - Ask;
 		
 		OrderSelect(ticket, SELECT_BY_TICKET, MODE_TRADES);
 		
-		if (OrderType() == OP_BUY && detect_profit && pl > 0.0015) {
-			if (pl > 0.0050 && Bid < ma[0]) {
-				OrderClose(ticket, OrderLots(), Bid, 0, White);
-				ticket = -1;
-				skip_bar = true;
-				is_trade = false;
-				count_bar = 0;
-			} else if (pl < 0.0050 && Bid < kijun_sen[0]) {
+		if (OrderType() == OP_BUY && detect_profit) {
+			if (pl > 0.0050 && Bid < ma_slow[0]) {
 				OrderClose(ticket, OrderLots(), Bid, 0, White);
 				ticket = -1;
 				skip_bar = true;
@@ -195,15 +181,8 @@ void OnTick () {
 			}
 			
 			
-		
-		} else if (OrderType() == OP_SELL && detect_profit && pl > 0.0015) {
-			if (pl > 0.0050 && Ask > ma[0]) {
-				OrderClose(ticket, OrderLots(), Ask, 0, White);
-				ticket = -1;
-				skip_bar = true;
-				is_trade = false;
-				count_bar = 0;
-			} else if (pl < 0.0050 && Ask > kijun_sen[0]) {
+		} else if (OrderType() == OP_SELL && detect_profit) {
+			if (pl > 0.0050 && Ask > ma_slow[0]) {
 				OrderClose(ticket, OrderLots(), Ask, 0, White);
 				ticket = -1;
 				skip_bar = true;
@@ -231,26 +210,28 @@ void getMarketData () {
 void read_ma () {
 	bool result = TRUE;
 	
-	if (ma[0] > ma[1]) {
-		for (int i=1; i<=20; i++) {
-			if (ma[1] > ma[i]) { result = FALSE; break; }
-		}
-		if (result == true) forecast = FC_LONG;
-	} else if (ma[0] < ma[1]) {
-		for (int i=1; i<=20; i++) {
-			if (ma[1] < ma[i]) { result = FALSE; break; }
-		}
-		
-		if (result == true) forecast = FC_SHORT;
+	trend_bar = 0;
+	for (int i=0; i<50; i++) {
+		if (ma_fast[i] > ma_slow[i]) trend_bar++;
+		else trend_bar--;
+	}
+	
+	if (trend_bar < -10 && ma_slow[0] < Ask) {
+		forecast = FC_LONG;
+	} else if (trend_bar > 10 && ma_slow[0] > Bid) {
+		forecast = FC_SHORT;
+	} else {
+		forecast = FC_FLAT;
 	}
 	
 }
 
 
+
+/*
 void analyze_market () {
 	int down_trend = 0, up_trend = 0, flat_trend = 0;	// trend_strength
 	int total_bar = 84;					// 84 = 12 * 7;
-	
 	
 	//for (int i=1; i<total_bar; i++) {
 	int i = 1;
@@ -275,5 +256,5 @@ void analyze_market () {
 	
 	
 }
-
+*/
 
