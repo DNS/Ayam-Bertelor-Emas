@@ -1,12 +1,12 @@
 //+------------------------------------------------------------------+
-//|                                   Price Bounce Back Analyzer.mq4 |
+//|                                       Price Rebound Analyzer.mq4 |
 //|                                    Copyright 2014, Daniel Sirait |
 //|                                          http://www.siraitx.com/ |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2014, Daniel Sirait"
 #property link      "http://www.siraitx.com/"
 #property version   "1.00"
-#property description "Bounce Back Analyzer v0.0.1"
+#property description "Price Rebound Analyzer v0.0.1"
 #property strict
 
 #define MAGICNUMBER  22072014
@@ -119,8 +119,10 @@ void OnDeinit (const int reason) {
 			
 		}
 	}
+	
 	int loss_round = (int) NormalizeDouble(max_loss*10000,0) ;
 	winapi_MessageBoxW("max_loss: " + IntegerToString(loss_round) + " pips\n", "Title!");
+	
 }
 
 
