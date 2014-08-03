@@ -24,7 +24,7 @@ double spread = 0.0;
 int leverage = 1;	// set normal leverage value : 1
 string buf;
 int ticket = -1;
-int period = PERIOD_H1;
+int period = PERIOD_M1;
 
 
 enum _MODE {
@@ -78,12 +78,13 @@ void OnDeinit (const int reason) {
 	
 	bool start;
 	int i, j;
-	int len = Bars - 1;
-	double loss = 0.0;
+	double loss = 0.0, loss_tmp = 0.0;
 	
 	for (i=Bars-1; i>=0; i--) {
 		
 		start = false;
+		loss = 0.0;
+		
 		for (j=i-1; j>=0; j--) {
 			
 			// run only once per "i" loop
@@ -99,11 +100,15 @@ void OnDeinit (const int reason) {
 				}
 			// after
 			} else {
-				if (Low[j] < Close[i]) {
-					loss = Close[i] - Low[j];
-				} else if (High[j] > Close[i]) {
-					loss = High[j] - Close[i];
+				if (mode == SHORT && Low[j] < Close[i]) {
+					loss_tmp = Close[i] - Low[j];
+					if (loss_tmp > loss) loss = loss_tmp;
+				} else if (mode == LONG && High[j] > Close[i]) {
+					loss_tmp = High[j] - Close[i];
+					if (loss_tmp > loss) loss = loss_tmp;
 				}
+				
+				//winapi_MessageBoxW("max_loss: " + DoubleToString(loss*1E+4) + " pips\n", "Title!");
 				
 				if (mode == SHORT && High[j] > Close[i]) {
 					if (loss > max_loss) max_loss = loss;
@@ -120,8 +125,8 @@ void OnDeinit (const int reason) {
 		}
 	}
 	
-	int loss_round = (int) NormalizeDouble(max_loss*10000,0) ;
-	winapi_MessageBoxW("max_loss: " + IntegerToString(loss_round) + " pips\n", "Title!");
+	
+	winapi_MessageBoxW("max_loss: " + DoubleToString(max_loss*1E+4) + " pips\n", "Title!");
 	
 }
 
