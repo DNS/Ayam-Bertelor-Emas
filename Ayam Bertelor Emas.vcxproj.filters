@@ -15,24 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ayam.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="darray.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hg-hook-twitter.c">
+    <ClCompile Include="abe.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ayam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="darray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="typemacro.h">
+    <ClInclude Include="abe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
