@@ -12,31 +12,24 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 
 #pragma once
 
-//#ifndef _ABE_H
-//#define _ABE_H
-
 #include <windows.h>
 
+
+
 typedef struct {
-	unsigned long size;
-	float *values;
+	CHAR pair[7];		/* eg: EURUSD, GBPUSD, USDIDR + NULL terminated char */
+	DWORD tick_length;
+	float *ticks;
 } PRICE_LOG;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 
 
 __declspec(dllexport) void winapi_MessageBoxA (const CHAR *, const CHAR *);
 __declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 
-#ifdef __cplusplus
-}
-#endif
+__declspec(dllexport) void initPriceLog (WCHAR *pair);
+__declspec(dllexport) void addPriceLog (double);
+__declspec(dllexport) void flushPriceLog ();
 
 
-/* _ABE_H */
-//#endif
 

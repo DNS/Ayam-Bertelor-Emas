@@ -18,9 +18,15 @@
     <ClCompile Include="abe.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="darray.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="darray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
