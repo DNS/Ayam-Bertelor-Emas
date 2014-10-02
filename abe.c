@@ -16,6 +16,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 
 #pragma comment(lib, "Comctl32.lib")
 
+
 #define _NO_DEBUG_HEAP
 #define _CRT_SECURE_NO_WARNINGS
 
