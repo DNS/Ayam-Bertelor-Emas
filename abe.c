@@ -11,7 +11,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 */
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
-	name='Microsoft.Windows.Common-Controls' version='6...0' \
+	name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 	processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #pragma comment(lib, "Comctl32.lib")
@@ -39,9 +39,8 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #include "abe.h"
 #include "darray.h"
 
-FILE *fh;
-PRICE_LOG plog;
-ARRAY_FLOAT *ticks;
+FILE *file_out;
+
 
 BOOL APIENTRY DllMain (HMODULE hModule, DWORD nReason, LPVOID Reserved) {
 	switch (nReason) {
@@ -66,47 +65,34 @@ void winapi_MessageBoxW (const WCHAR *text, const WCHAR *caption) {
 	MessageBoxW(NULL, text, caption, MB_OK);
 }
 
+
+
 void initPriceLog (WCHAR *wpair) {
-	WideCharToMultiByte(CP_ACP, 0, wpair, lstrlenW(wpair), plog.pair, 7, NULL, NULL);
+	CHAR file_name[256];
+	CHAR pair[16];
 
-	//lstrcpyW(plog.pair, wpair);
 
-	ticks = arrayFloat_new();
+	WideCharToMultiByte(CP_ACP, 0, wpair, lstrlenW(wpair), pair, 7, NULL, NULL);
 
-	
+	sprintf(file_name, "D:\\%s-D1-2013.xml", pair);
+
+	file_out = fopen(file_name, "wb");
+	fprintf(file_out, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n");
+	fprintf(file_out, "<forex pair=\"EURUSD\" period=\"D1\" datetime=\"2013\">\n");
+
 }
 
-void flushPriceLog () {
-	DWORD i;
-	HANDLE file_out;
-	DWORD bytesWritten;
-	CHAR file_name[500];
-
-	lstrcpyA(file_name, "");
-	lstrcatA(file_name, plog.pair);
-	lstrcatA(file_name, ".txt");
-
-	file_out = CreateFileA(file_name, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	
-	plog.tick_length = arrayFloat_size(ticks);
-	
-	WriteFile(file_out, plog.pair, sizeof(plog.pair), &bytesWritten, NULL);
-	WriteFile(file_out, &plog.tick_length, sizeof(DWORD), &bytesWritten, NULL);
-	
-	for (i=0; i<plog.tick_length; i++) {
-		float tick = arrayFloat_get(ticks, i);
-		WriteFile(file_out, &tick, sizeof(float), &bytesWritten, NULL);
-	}
-
-	CloseHandle(file_out);
-	arrayFloat_destroy(ticks);
+void closePriceLog () {
+	fprintf(file_out, "</forex>");
+	fclose(file_out);
 }
 
 void addPriceLog (double price) {
-	float f_price = price;
-	arrayFloat_add(ticks, price);
+	fprintf(file_out, "<price>%.5f</price>", price);
 }
 
+
+//MessageBoxA(NULL, "asd", "enter_market", MB_OK);
 
 
 void main () {
@@ -118,11 +104,16 @@ void main () {
 	flushPriceLog();
 
 
-	system("pause");
+	//system("pause");
 }
 
-//MessageBoxA(NULL, "asd", "enter_market", MB_OK);
 
 
+
+
+/*
+
+<?xml version="1.0" encoding="utf-8"?>
+*/
 
 

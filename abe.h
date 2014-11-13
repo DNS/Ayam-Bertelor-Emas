@@ -16,20 +16,13 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 
 
 
-typedef struct {
-	CHAR pair[7];		/* eg: EURUSD, GBPUSD, USDIDR + NULL terminated char */
-	DWORD tick_length;
-	float *ticks;
-} PRICE_LOG;
-
-
 
 __declspec(dllexport) void winapi_MessageBoxA (const CHAR *, const CHAR *);
 __declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 
 __declspec(dllexport) void initPriceLog (WCHAR *pair);
 __declspec(dllexport) void addPriceLog (double);
-__declspec(dllexport) void flushPriceLog ();
+__declspec(dllexport) void closePriceLog ();
 
 
 
