@@ -21,6 +21,7 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 #define _CRT_SECURE_NO_WARNINGS
 
 /* force MSVC to use ANSI/WideChar function, must be before #include <windows.h> */
+//#define UNICODE
 #undef UNICODE
 
 
@@ -69,43 +70,49 @@ void winapi_MessageBoxW (const WCHAR *text, const WCHAR *caption) {
 
 void initPriceLog (WCHAR *wpair) {
 	CHAR file_name[256];
-	CHAR pair[16];
+	CHAR pair[16] = {0};
 
-
+	//winapi_MessageBoxA("test", "test");
 	WideCharToMultiByte(CP_ACP, 0, wpair, lstrlenW(wpair), pair, 7, NULL, NULL);
 
-	sprintf(file_name, "D:\\%s-D1-2013.xml", pair);
+	sprintf(file_name, "D:\\%s.xml", pair);
 
 	file_out = fopen(file_name, "wb");
-	fprintf(file_out, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n");
-	fprintf(file_out, "<forex pair=\"EURUSD\" period=\"D1\" datetime=\"2013\">\n");
+	fprintf(file_out, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n\r\n");
+	fprintf(file_out, "<forex pair=\"%s\" period=\"H1\" price=\"Open\">\r\n", pair);
 
 }
 
 void closePriceLog () {
-	fprintf(file_out, "</forex>");
+	fprintf(file_out, "</forex>\r\n");
 	fclose(file_out);
 }
 
-void addPriceLog (double price) {
-	fprintf(file_out, "<price>%.5f</price>", price);
+void addPriceLog (WCHAR *wdatetime, double price) {
+	CHAR date[32] = {0};
+	int len = lstrlenW(wdatetime);
+	//yyyy.mm.dd
+	//MessageBoxW(NULL, wdatetime, L"wdatetime", MB_OK);
+	WideCharToMultiByte(CP_ACP, 0, wdatetime, len, date, 16, NULL, NULL);
+	date[len] = '\0';
+
+	fprintf(file_out, "\t<price date=\"%s\">%f</price>\r\n", date, price);
 }
 
 
 //MessageBoxA(NULL, "asd", "enter_market", MB_OK);
 
 
-void main () {
-	initPriceLog(L"EURUSD");
-
-	addPriceLog(1.12345);
-	addPriceLog(2.12345);
-
-	flushPriceLog();
-
-
-	//system("pause");
-}
+//void main () {
+//	WCHAR *t = L"abc";
+//	CHAR s[32];
+//
+//	//WideCharToMultiByte(CP_ACP, 0, t, lstrlenW(t), s, lstrlenW(t)/2, NULL, NULL);
+//
+//	printf("%d, %d\n", wcslen(t), lstrlenW(t));
+//
+//	system("pause");
+//}
 
 
 

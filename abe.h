@@ -20,8 +20,8 @@ WHATEVER THAT MAY BE (GET BUSTED, WORLD WAR, ETC..).
 __declspec(dllexport) void winapi_MessageBoxA (const CHAR *, const CHAR *);
 __declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 
-__declspec(dllexport) void initPriceLog (WCHAR *pair);
-__declspec(dllexport) void addPriceLog (double);
+__declspec(dllexport) void initPriceLog (WCHAR *);
+__declspec(dllexport) void addPriceLog (WCHAR *, double);
 __declspec(dllexport) void closePriceLog ();
 
 
