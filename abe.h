@@ -21,7 +21,7 @@ __declspec(dllexport) void winapi_MessageBoxA (const CHAR *, const CHAR *);
 __declspec(dllexport) void winapi_MessageBoxW (const WCHAR *, const WCHAR *);
 
 __declspec(dllexport) void initPriceLog (WCHAR *);
-__declspec(dllexport) void addPriceLog (WCHAR *, double);
+__declspec(dllexport) void addPriceLog (WCHAR *, double, double, double, double, unsigned long);
 __declspec(dllexport) void closePriceLog ();
 
 

@@ -75,20 +75,20 @@ void initPriceLog (WCHAR *wpair) {
 	//winapi_MessageBoxA("test", "test");
 	WideCharToMultiByte(CP_ACP, 0, wpair, lstrlenW(wpair), pair, 7, NULL, NULL);
 
-	sprintf(file_name, "D:\\%s.xml", pair);
+	sprintf(file_name, "D:\\%s.csv", pair);
 
 	file_out = fopen(file_name, "wb");
-	fprintf(file_out, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n\r\n");
-	fprintf(file_out, "<forex pair=\"%s\" period=\"H1\" price=\"Open\">\r\n", pair);
-
+	fprintf(file_out, "date,open,close,high,low,volume\r\n");
+	
 }
 
 void closePriceLog () {
-	fprintf(file_out, "</forex>\r\n");
+	fflush(file_out);
 	fclose(file_out);
 }
 
-void addPriceLog (WCHAR *wdatetime, double price) {
+
+void addPriceLog (WCHAR *wdatetime, double open, double close, double high, double low, unsigned long volume) {
 	CHAR date[32] = {0};
 	int len = lstrlenW(wdatetime);
 	//yyyy.mm.dd
@@ -96,7 +96,7 @@ void addPriceLog (WCHAR *wdatetime, double price) {
 	WideCharToMultiByte(CP_ACP, 0, wdatetime, len, date, 16, NULL, NULL);
 	date[len] = '\0';
 
-	fprintf(file_out, "\t<price date=\"%s\">%f</price>\r\n", date, price);
+	fprintf(file_out, "%s,%.5f,%.5f,%.5f,%.5f,%d\r\n", date, open, close, high, low, volume);
 }
 
 
