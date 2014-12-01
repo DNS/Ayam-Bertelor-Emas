@@ -78,7 +78,7 @@ void initPriceLog (WCHAR *wpair) {
 	sprintf(file_name, "D:\\%s.csv", pair);
 
 	file_out = fopen(file_name, "wb");
-	fprintf(file_out, "date,open,close,high,low,volume\r\n");
+	fprintf(file_out, "date,open,high,low,close,volume\r\n");
 	
 }
 
@@ -88,7 +88,7 @@ void closePriceLog () {
 }
 
 
-void addPriceLog (WCHAR *wdatetime, double open, double close, double high, double low, unsigned long volume) {
+void addPriceLog (WCHAR *wdatetime, double open, double high, double low, double close, unsigned long volume) {
 	CHAR date[32] = {0};
 	int len = lstrlenW(wdatetime);
 	//yyyy.mm.dd
@@ -96,7 +96,7 @@ void addPriceLog (WCHAR *wdatetime, double open, double close, double high, doub
 	WideCharToMultiByte(CP_ACP, 0, wdatetime, len, date, 16, NULL, NULL);
 	date[len] = '\0';
 
-	fprintf(file_out, "%s,%.5f,%.5f,%.5f,%.5f,%d\r\n", date, open, close, high, low, volume);
+	fprintf(file_out, "%s,%.5f,%.5f,%.5f,%.5f,%d\r\n", date, open, high, low, close, volume);
 }
 
 
