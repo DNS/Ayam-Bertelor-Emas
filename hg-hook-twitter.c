@@ -66,19 +66,18 @@ int main (int argc, const char **argv, const char **env) {
 	//puts(repo_name);
 	
 	sprintf(buf, 
-	"java -jar \"D:\\Ultimate-Twitter-Bot.jar\" \"" 
-	"%s" \
-	" pushed a commit to " \
-	"%s" \
-	" - " \
-	"%s" \
-	" - " \
-	"%s" \
-	"/commits/" \
-	"%s\"",
-	"SiraitX", repo_name, commit_msg, paths_default, node
-	
-	
+		"java -jar \"D:\\Ultimate-Twitter-Bot.jar\" \"" 
+		"%s" \
+		" pushed a commit to " \
+		"%s" \
+		" - " \
+		"%s" \
+		" - " \
+		"%s" \
+		"/commits/" \
+		"%s\"",
+		"SiraitX",
+		repo_name, commit_msg, paths_default, node
 	);
 	
 	//puts(buf);
